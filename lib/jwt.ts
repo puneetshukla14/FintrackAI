@@ -1,10 +1,15 @@
-import jwt, { JwtPayload } from 'jsonwebtoken'
-const SECRET = process.env.JWT_SECRET || 'supersecret'
+import jwt from 'jsonwebtoken'
 
-export function signToken(payload: object): string {
-  return jwt.sign(payload, SECRET, { expiresIn: '7d', algorithm: 'HS256' })
+export function signToken(payload: object) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined')
+  }
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' })
 }
 
-export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, SECRET) as JwtPayload
+export function verifyToken(token: string) {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined')
+  }
+  return jwt.verify(token, process.env.JWT_SECRET)
 }
