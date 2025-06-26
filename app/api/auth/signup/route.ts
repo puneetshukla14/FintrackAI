@@ -1,36 +1,39 @@
-import { NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import User from '@/models/user'
-import UserData from '@/models/UserData'
-import bcrypt from 'bcryptjs'
-import { signToken } from '@/lib/jwt'
+export const dynamic = 'force-dynamic';
+
+import { NextResponse } from 'next/server';
+import dbConnect from '@/lib/mongodb';
+import User from '@/models/user';
+import UserData from '@/models/UserData';
+import bcrypt from 'bcryptjs';
+import { signToken } from '@/lib/jwt';
 
 export async function POST(req: Request) {
   try {
-    // ✅ Log request input to debug
-    const data = await req.json()
-    console.log("📦 Data:", data)
+    console.log("🔧 POST /api/auth/signup");
 
     if (!process.env.MONGODB_URI) {
-      console.error('❌ MONGODB_URI missing')
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+      console.error('❌ MONGODB_URI missing');
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
     }
 
-    await dbConnect()
+    await dbConnect();
 
-    const { username, password } = data
+    const data = await req.json();
+    console.log("📦 Request Data:", data);
+
+    const { username, password } = data;
 
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 });
     }
 
-    const exists = await User.findOne({ username })
+    const exists = await User.findOne({ username });
     if (exists) {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
     }
 
-    const hash = await bcrypt.hash(password, 10)
-    const user = await User.create({ username, password: hash })
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, password: hash });
 
     await UserData.create({
       username,
@@ -45,11 +48,12 @@ export async function POST(req: Request) {
         gender: 'Other',
       },
       expenses: [],
-    })
+    });
 
-    const token = signToken({ userId: user._id, username })
+    const token = signToken({ userId: user._id, username });
 
-    const response = NextResponse.json({ success: true, token }, { status: 201 })
+    const response = NextResponse.json({ success: true, token }, { status: 201 });
+
     response.cookies.set({
       name: 'token',
       value: token,
@@ -57,12 +61,12 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    })
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
 
-    return response
+    return response;
   } catch (error: any) {
-    console.error('🔥 API crashed:', error.message)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('🔥 API crashed:', error.message);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
