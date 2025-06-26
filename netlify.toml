@@ -6,5 +6,5 @@ publish = ".next"
 directory = ".netlify/functions"
 node_bundler = "esbuild"
 
-[plugins]
-  package = "@netlify/next"
+[[plugins]]
+package = "@netlify/next"
