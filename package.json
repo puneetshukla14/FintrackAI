@@ -17,6 +17,7 @@
     "framer-motion": "^12.19.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.523.0",
+    "module-name": "^0.0.1-security",
     "mongoose": "^8.16.0",
     "next": "^15.3.4",
     "postcss": "^8.5.6",
