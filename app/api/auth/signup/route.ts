@@ -8,7 +8,6 @@ import { signToken } from '@/lib/jwt'
 export async function POST(req: Request) {
   try {
     if (!process.env.MONGODB_URI) {
-      console.error('❌ MONGODB_URI missing')
       return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
     }
 
