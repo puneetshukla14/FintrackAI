@@ -1,3 +1,4 @@
+// ✅ app/api/auth/signup/route.ts
 import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
@@ -8,6 +9,7 @@ import { signToken } from '@/lib/jwt'
 export async function POST(req: Request) {
   try {
     if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI missing')
       return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
     }
 
@@ -55,8 +57,8 @@ export async function POST(req: Request) {
     })
 
     return response
-  } catch (error: any) {
-    console.error('❌ Signup Error:', error.message)
+  } catch (err: any) {
+    console.error('Signup Error:', err.message)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
