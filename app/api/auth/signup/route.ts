@@ -1,30 +1,27 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
 import UserData from '@/models/UserData'
 import bcrypt from 'bcryptjs'
 import { signToken } from '@/lib/jwt'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed')
-
+export async function POST(req: Request) {
   try {
     if (!process.env.MONGODB_URI) {
-      console.error('❌ MONGODB_URI is missing in environment variables')
-      return res.status(500).json({ error: 'Server misconfiguration' })
+      console.error('❌ MONGODB_URI missing')
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
     }
 
     await dbConnect()
-
-    const { username, password } = req.body
+    const { username, password } = await req.json()
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Missing username or password' })
+      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
 
     const exists = await User.findOne({ username })
     if (exists) {
-      return res.status(409).json({ error: 'Username already exists' })
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
     }
 
     const hash = await bcrypt.hash(password, 10)
@@ -47,16 +44,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const token = signToken({ userId: user._id, username })
 
-    res.setHeader(
-      'Set-Cookie',
-      `token=${token}; Path=/; HttpOnly; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax; ${
-        process.env.NODE_ENV === 'production' ? 'Secure;' : ''
-      }`
-    )
+    const response = NextResponse.json({ success: true, token }, { status: 201 })
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    })
 
-    return res.status(201).json({ success: true })
+    return response
   } catch (error: any) {
-    console.error('❌ Signup Error:', error.message || error)
-    return res.status(500).json({ error: 'Internal server error' })
+    console.error('❌ Signup Error:', error.message)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
