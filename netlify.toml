@@ -7,4 +7,4 @@ directory = ".netlify/functions"
 node_bundler = "esbuild"
 
 [[plugins]]
-package = "@netlify/next"
+package = "@netlify/plugin-nextjs"
