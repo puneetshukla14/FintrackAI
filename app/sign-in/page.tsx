@@ -15,46 +15,36 @@ export default function SignInPage() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setError('')
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
 
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-
-    let data: any = {}
     try {
-      data = await res.json()
-    } catch {
-      return setError('Unexpected server response')
-    }
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
 
-    if (!res.ok) {
-      console.error('Login failed:', data)
-      return setError(data.error || 'Login failed')
-    }
+      let data: any = {}
+      try {
+        data = await res.json()
+      } catch {
+        return setError('Unexpected server response')
+      }
 
-    if (!data.token) {
-      return setError('No token received')
-    }
+      if (!res.ok) {
+        console.error('Login failed:', data)
+        return setError(data.error || 'Login failed')
+      }
 
-    localStorage.setItem('token', data.token)
-    console.log('Token saved:', data.token)
-
-    setTimeout(() => {
+      // ✅ Cookie is already set by backend
       router.push('/dashboard')
-    }, 300)
-  } catch (err) {
-    console.error('Login error:', err)
-    setError('Something went wrong')
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Something went wrong. Please try again.')
+    }
   }
-}
-
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800 p-4">
@@ -77,7 +67,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             />
           </div>
 
-          {/* Password with Eye Icon */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">

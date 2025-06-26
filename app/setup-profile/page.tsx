@@ -6,7 +6,7 @@ import { FaMale, FaFemale } from 'react-icons/fa'
 
 export default function SetupProfilePage() {
   const [form, setForm] = useState({
-    name: '',
+    fullName: '',
     monthlySalary: '',
     gender: '',
   })
@@ -40,7 +40,7 @@ export default function SetupProfilePage() {
     setError('')
 
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) return setError('Unauthorized request')
 
     try {
       const res = await fetch('/api/user/profile', {
@@ -50,7 +50,7 @@ export default function SetupProfilePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          fullName: form.name,
+          fullName: form.fullName,
           monthlySalary: Number(form.monthlySalary),
           gender: form.gender,
         }),
@@ -59,21 +59,23 @@ export default function SetupProfilePage() {
       const data = await res.json()
 
       if (res.ok) {
-        const userToSave = {
-          profile: {
-            fullName: form.name,
-            salary: Number(form.monthlySalary),
-            gender: form.gender,
-          },
-        }
-        localStorage.setItem('user', JSON.stringify(userToSave))
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            profile: {
+              fullName: form.fullName,
+              salary: Number(form.monthlySalary),
+              gender: form.gender,
+            },
+          })
+        )
         router.replace('/dashboard')
       } else {
         setError(data.error || 'Error updating profile')
       }
     } catch (err) {
+      console.error('Profile setup error:', err)
       setError('Something went wrong')
-      console.error(err)
     }
   }
 
@@ -91,8 +93,8 @@ export default function SetupProfilePage() {
           <div>
             <label className="text-sm text-zinc-400 block mb-1">Full Name</label>
             <input
-              name="name"
-              value={form.name}
+              name="fullName"
+              value={form.fullName}
               onChange={handleChange}
               placeholder="Your Name"
               className="w-full px-4 py-3 bg-zinc-800 text-white border border-zinc-600 rounded-lg placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -114,11 +116,10 @@ export default function SetupProfilePage() {
             />
           </div>
 
-          {/* Gender Avatar Select */}
+          {/* Gender Selection */}
           <div>
             <label className="text-sm text-zinc-400 block mb-2">Select Gender</label>
             <div className="flex justify-between gap-4">
-              {/* Male */}
               <button
                 type="button"
                 onClick={() => handleGenderSelect('Male')}
@@ -133,7 +134,6 @@ export default function SetupProfilePage() {
                 <span className="mt-1 text-sm font-medium">Male</span>
               </button>
 
-              {/* Female */}
               <button
                 type="button"
                 onClick={() => handleGenderSelect('Female')}
@@ -152,7 +152,7 @@ export default function SetupProfilePage() {
 
           <button
             type="submit"
-            disabled={!form.name || !form.monthlySalary || !form.gender}
+            disabled={!form.fullName || !form.monthlySalary || !form.gender}
             className="w-full py-3 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold shadow-md transition duration-200 disabled:opacity-50"
           >
             Save & Continue

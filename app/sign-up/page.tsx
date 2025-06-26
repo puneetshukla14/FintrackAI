@@ -30,7 +30,6 @@ export default function SignUpPage() {
       try {
         data = await res.json()
       } catch {
-        // If not valid JSON
         return setError('Unexpected server response')
       }
 
@@ -38,7 +37,7 @@ export default function SignUpPage() {
         return setError(data?.error || 'Signup failed')
       }
 
-      localStorage.setItem('token', data.token)
+      // ✅ Cookie is set by server, so just redirect
       router.push('/setup-profile')
     } catch (err) {
       console.error('Signup Error:', err)
@@ -67,7 +66,7 @@ export default function SignUpPage() {
             />
           </div>
 
-          {/* Password with Eye Icon */}
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">
