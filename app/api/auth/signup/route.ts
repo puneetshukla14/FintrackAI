@@ -7,12 +7,18 @@ import { signToken } from '@/lib/jwt'
 
 export async function POST(req: Request) {
   try {
+    // ✅ Fail-safe check
+    if (!process.env.MONGODB_URI) {
+      console.error('❌ MONGODB_URI is missing in environment variables')
+      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+    }
+
     await dbConnect()
 
     const { username, password } = await req.json()
 
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
 
     const exists = await User.findOne({ username })
@@ -40,8 +46,8 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    // ✅ Set the cookie
-    const response = NextResponse.json({ success: true }, { status: 201 })
+    // ✅ Set HTTP-only cookie
+    const response = NextResponse.json({ success: true, token }, { status: 201 })
     response.cookies.set({
       name: 'token',
       value: token,
@@ -54,7 +60,7 @@ export async function POST(req: Request) {
 
     return response
   } catch (error: any) {
-    console.error('Signup Error:', error.message)
+    console.error('❌ Signup Error:', error.message || error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
