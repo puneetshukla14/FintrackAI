@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
 } from 'recharts'
 import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils' // optional classNames util
+
 
 const MAIN_COLOR = '#0ea5e9'
 const GRADIENT_ID = 'mainBarGradient'
