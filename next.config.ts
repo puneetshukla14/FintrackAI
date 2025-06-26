@@ -1,12 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
-/** @type {import('next').NextConfig} */
-experimental: {
-  serverActions: {},
+const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {} // ✅ correct object
+  },
+  output: 'standalone', // ✅ for Netlify SSR support
+  reactStrictMode: true
 }
-,
-  output: 'standalone', // 🟡 Use standalone for Netlify SSR support
-  reactStrictMode: true,
-};
 
-module.exports = nextConfig;
+export default nextConfig
