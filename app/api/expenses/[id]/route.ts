@@ -3,8 +3,13 @@ import dbConnect from '@/lib/mongodb'
 import { verifyToken } from '@/lib/jwt'
 import UserData from '@/models/UserData'
 
+// 🛠 Correct type for dynamic params
+interface RouteParams {
+  params: { id: string }
+}
+
 // ✅ DELETE expense by ID
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: RouteParams) {
   await dbConnect()
 
   const token = req.headers.get('authorization')?.split(' ')[1]
@@ -18,8 +23,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     const initialLength = user.expenses.length
 
-    // ✅ Filter out the expense by ID
-    user.expenses = user.expenses.filter((exp: any) => exp._id.toString() !== params.id)
+    user.expenses = user.expenses.filter((exp: any) => exp._id.toString() !== context.params.id)
 
     if (user.expenses.length === initialLength) {
       return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
@@ -34,7 +38,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 }
 
 // ✅ UPDATE expense by ID
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: RouteParams) {
   await dbConnect()
 
   const token = req.headers.get('authorization')?.split(' ')[1]
@@ -47,10 +51,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const user = await UserData.findOne({ username })
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-    const expense = user.expenses.id(params.id) // ✅ Mongoose subdoc access
+    const expense = user.expenses.id(context.params.id)
     if (!expense) return NextResponse.json({ error: 'Expense not found' }, { status: 404 })
 
-    // ✅ Update fields only if present in request
     Object.assign(expense, updatedData)
 
     await user.save()
