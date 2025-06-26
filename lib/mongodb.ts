@@ -1,4 +1,3 @@
-// lib/mongodb.ts
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
@@ -12,16 +11,12 @@ interface MongooseGlobal {
   promise: Promise<typeof mongoose> | null;
 }
 
-// Extend globalThis to cache the connection
 declare global {
   var mongoose: MongooseGlobal | undefined;
 }
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
+// Use fallback to initialize
+const cached = global.mongoose ??= { conn: null, promise: null };
 
 async function dbConnect() {
   if (cached.conn) return cached.conn;
