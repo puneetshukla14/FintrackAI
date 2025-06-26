@@ -1,4 +1,3 @@
-// ✅ app/api/auth/signup/route.ts
 import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
@@ -8,13 +7,18 @@ import { signToken } from '@/lib/jwt'
 
 export async function POST(req: Request) {
   try {
+    // ✅ Log request input to debug
+    const data = await req.json()
+    console.log("📦 Data:", data)
+
     if (!process.env.MONGODB_URI) {
-      console.error('MONGODB_URI missing')
+      console.error('❌ MONGODB_URI missing')
       return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
     }
 
     await dbConnect()
-    const { username, password } = await req.json()
+
+    const { username, password } = data
 
     if (!username || !password) {
       return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
@@ -57,8 +61,8 @@ export async function POST(req: Request) {
     })
 
     return response
-  } catch (err: any) {
-    console.error('Signup Error:', err.message)
+  } catch (error: any) {
+    console.error('🔥 API crashed:', error.message)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
