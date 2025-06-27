@@ -29,13 +29,14 @@ export default function SetupProfilePage() {
           fullName: form.fullName,
           monthlySalary: Number(form.monthlySalary),
           gender: form.gender
-        })
+        }),
+        credentials: 'include' // ✅ Cookie send karna important hai
       })
 
       const data = await res.json()
       if (!res.ok) return setError(data.error || 'Failed to update profile')
 
-      router.replace('/dashboard')
+      router.replace('/dashboard') // ✅ Redirect to dashboard
     } catch (err) {
       console.error('Profile setup error:', err)
       setError('Something went wrong.')
