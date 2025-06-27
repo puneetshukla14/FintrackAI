@@ -51,6 +51,7 @@ response.cookies.set({
 })
 return response
 
+
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err)
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
