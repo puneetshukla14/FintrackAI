@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
 import UserData from '@/models/UserData'
@@ -32,16 +32,14 @@ export async function POST(req: Request) {
         phone: '',
         dob: '',
         address: '',
-        gender: 'Other',
+        gender: 'Other'
       },
-      expenses: [],
+      expenses: []
     })
 
     const token = signToken({ userId: user._id, username })
 
-    // 🔥 Use redirect response, not JSON
-    const response = NextResponse.redirect(new URL('/setup-profile', req.url))
-    
+    const response = NextResponse.redirect(new URL('/setup-profile', req.url)) // ✅ REAL REDIRECT
     response.cookies.set({
       name: 'token',
       value: token,
@@ -51,7 +49,6 @@ export async function POST(req: Request) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
     })
-
     return response
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err)
