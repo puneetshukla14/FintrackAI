@@ -1,3 +1,4 @@
+// /api/auth/signup/route.ts
 import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
@@ -7,49 +8,52 @@ import { signToken } from '@/lib/jwt'
 
 export async function POST(req: Request) {
   try {
-    console.log('Connecting to DB...')
     await dbConnect()
-
     const { username, password } = await req.json()
-    console.log('Received:', { username, password })
 
-    if (!username || !password)
+    if (!username || !password) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+    }
 
     const exists = await User.findOne({ username })
-    console.log('User exists:', exists)
+    if (exists) {
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
+    }
 
-    if (exists)
-      return NextResponse.json({ error: 'Username exists' }, { status: 409 })
-
-    const hash = await bcrypt.hash(password, 10)
-    console.log('Password hashed')
-
-    const user = await User.create({ username, password: hash })
-    console.log('User created')
+    const hashed = await bcrypt.hash(password, 10)
+    const user = await User.create({ username, password: hashed })
 
     await UserData.create({
       username,
       profile: {
         fullName: '',
-        email: '',
         monthlySalary: 0,
+        gender: 'Other',
+        email: '',
         bio: '',
         phone: '',
         dob: '',
-        address: '',
-        gender: 'Other' // ✅ fix here
+        address: ''
       },
-      expenses: []
+      expenses: [],
+      credits: []
     })
-    console.log('UserData created')
 
     const token = signToken({ userId: user._id, username })
-    console.log('JWT created')
 
-    return NextResponse.json({ token }, { status: 201 })
-  } catch (error: any) {
-    console.error('Signup Error:', error.message)
+    const res = NextResponse.json({ success: true }, { status: 201 })
+
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+
+    return res
+  } catch (err) {
+    console.error('Signup Error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
