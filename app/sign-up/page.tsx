@@ -23,11 +23,10 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-        redirect: 'follow' // 👈 allow following redirect
+        body: JSON.stringify(form)
       })
 
-      // ✅ If redirect was followed by browser
+      // ✅ If response is redirected (works in browser)
       if (res.redirected) {
         window.location.href = res.url
         return
@@ -40,9 +39,9 @@ export default function SignUpPage() {
         return
       }
 
-      // ✅ fallback, if no redirect happened automatically
+      // ✅ fallback redirect (for SSR environments)
       if (data.redirect) {
-        window.location.href = data.redirect
+        router.push(data.redirect)
       }
     } catch (err) {
       console.error('Signup Error:', err)
