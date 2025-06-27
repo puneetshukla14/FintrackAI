@@ -1,45 +1,41 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import dbConnect from '@/lib/mongodb';
+// app/api/auth/signup/route.ts
+import { NextResponse } from 'next/server'
+import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import dbConnect from '@/lib/mongodb' // ✅ use your existing typed function
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
+const JWT_SECRET = 'skdjf8329r98u32r98u23r98u23r98u23r98u23r98'
 
-if (!JWT_SECRET) {
-  throw new Error('❌ Please define the JWT_SECRET environment variable');
-}
-
-// ✅ Define schema
+// ====== User Schema ======
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-});
+})
 
-const User = mongoose.models.User || mongoose.model('User', UserSchema);
+const User = mongoose.models.User || mongoose.model('User', UserSchema)
 
-// ✅ Signup Route
+// ====== Route POST ======
 export async function POST(req: Request) {
   try {
-    await dbConnect();
+    await dbConnect() // ✅ proper typed connection
 
-    const { username, password } = await req.json();
-
+    const { username, password } = await req.json()
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
 
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ username })
     if (existingUser) {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
     }
 
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hash });
+    const hash = await bcrypt.hash(password, 10)
+    const user = await User.create({ username, password: hash })
 
-    const token = jwt.sign({ userId: user._id, username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id, username }, JWT_SECRET, { expiresIn: '7d' })
 
-    const res = NextResponse.json({ success: true, token }, { status: 201 });
+    const res = NextResponse.json({ success: true, token }, { status: 201 })
     res.cookies.set({
       name: 'token',
       value: token,
@@ -48,11 +44,11 @@ export async function POST(req: Request) {
       path: '/',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
-    });
+    })
 
-    return res;
+    return res
   } catch (err: any) {
-    console.error('🔥 Signup Error:', err.message);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('🔥 Signup Error:', err.message)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
