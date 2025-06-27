@@ -20,7 +20,7 @@ export default function SignInPage() {
     setError('')
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -35,11 +35,11 @@ export default function SignInPage() {
 
       if (!res.ok) {
         console.error('Login failed:', data)
-        return setError(data.error || 'Login failed')
+        return setError(data.error || 'Signup failed')
       }
 
       // ✅ Cookie is already set by backend
-      router.push('/dashboard')
+      router.push('/setup-profile')
     } catch (err) {
       console.error('Login error:', err)
       setError('Something went wrong. Please try again.')
