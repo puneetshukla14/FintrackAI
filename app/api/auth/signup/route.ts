@@ -7,25 +7,20 @@ import { signToken } from '@/lib/jwt'
 
 export async function POST(req: Request) {
   try {
-    console.log('Connecting to DB...');
-    await dbConnect();
-
-    const { username, password } = await req.json();
-    console.log('Received signup:', { username, password: password ? '***' : null });
+    await dbConnect()
+    const { username, password } = await req.json()
 
     if (!username || !password) {
-      console.error('Missing fields');
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
-    const exists = await User.findOne({ username });
+    const exists = await User.findOne({ username })
     if (exists) {
-      console.error('Username already exists');
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashed });
+    const hashed = await bcrypt.hash(password, 10)
+    const user = await User.create({ username, password: hashed })
 
     await UserData.create({
       username,
@@ -39,26 +34,30 @@ export async function POST(req: Request) {
         address: '',
         gender: 'Other'
       },
-      expenses: [],
-      credits: []
-    });
+      expenses: []
+      // credits: [] ✅ Include only if your schema supports it
+    })
 
-    const token = signToken({ userId: user._id, username });
+    const token = signToken({ userId: user._id, username })
 
-const response = NextResponse.json({ success: true }, { status: 201 })
-response.cookies.set({
-  name: 'token',
-  value: token,
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-  sameSite: 'lax',
-  maxAge: 60 * 60 * 24 * 7,
-})
-return response
+    const response = new NextResponse(JSON.stringify({ token }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    })
 
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    })
+
+    return response
   } catch (err: any) {
-    console.error('🚨 SIGNUP ERROR:', err);
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    console.error('🚨 SIGNUP ERROR:', err)
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
   }
 }
