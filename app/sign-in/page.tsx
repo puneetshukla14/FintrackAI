@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function SignInPage() {
-  const router = useRouter()
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,11 +34,11 @@ export default function SignInPage() {
 
       if (!res.ok) {
         console.error('Login failed:', data)
-        return setError(data.error || 'Signup failed')
+        return setError(data?.error || 'Login failed')
       }
 
-      // ✅ Cookie is already set by backend
-      router.push('/setup-profile')
+      // ✅ Force full-page reload so cookie is respected by middleware
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('Login error:', err)
       setError('Something went wrong. Please try again.')
