@@ -12,12 +12,23 @@ const protectedRoutes = [
 ]
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.replace('Bearer ', '')
+  const token =
+    req.cookies.get('token')?.value ||
+    req.headers.get('authorization')?.replace('Bearer ', '')
 
-  const isProtected = protectedRoutes.some(path => req.nextUrl.pathname.startsWith(path))
+  const { pathname } = req.nextUrl
+
+  // Check if current path is protected
+  const isProtected = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  )
 
   if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/signin', req.url)) // ✅ FIXED FROM /signin
+    // Redirect unauthenticated user to sign-in
+    const signInUrl = req.nextUrl.clone()
+    signInUrl.pathname = '/sign-in'
+    signInUrl.searchParams.set('redirectedFrom', pathname) // Optional: Track original route
+    return NextResponse.redirect(signInUrl)
   }
 
   return NextResponse.next()
