@@ -14,21 +14,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json()
-  const { fullName, monthlySalary } = body
+  const { fullName, monthlySalary, gender } = await req.json()
 
   try {
     const updated = await UserData.findOneAndUpdate(
       { username: decoded.username },
-      { profile: { fullName, monthlySalary } },
-      { new: true, upsert: true }
+      {
+        $set: {
+          'profile.fullName': fullName,
+          'profile.monthlySalary': monthlySalary,
+          'profile.gender': gender,
+        },
+      },
+      { new: true }
     )
+
+    if (!updated) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
 
     return NextResponse.json(
       { success: true, profile: updated.profile },
       { status: 200 }
     )
   } catch (error) {
+    console.error('Profile update error:', error)
     return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   }
 }
