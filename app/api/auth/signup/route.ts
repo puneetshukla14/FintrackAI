@@ -1,72 +1,68 @@
-export const dynamic = 'force-dynamic';
+import { NextResponse } from 'next/server'
+import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
-import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/user';
-import UserData from '@/models/UserData';
-import bcrypt from 'bcryptjs';
-import { signToken } from '@/lib/jwt';
+// ====== ENV ======
+const MONGODB_URI = 'mongodb+srv://puneetshukla043:u2c38K7nwVNnKNIk@fintrack.um7seop.mongodb.net/?retryWrites=true&w=majority&appName=Fintrack'
+const JWT_SECRET = 'skdjf8329r98u32r98u23r98u23r98u23r98u23r98'
 
+// ====== DB Setup ======
+if (!global.mongoose) global.mongoose = { conn: null, promise: null }
+
+async function dbConnect() {
+  if (global.mongoose.conn) return global.mongoose.conn
+  if (!global.mongoose.promise) {
+    global.mongoose.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+    })
+  }
+  global.mongoose.conn = await global.mongoose.promise
+  return global.mongoose.conn
+}
+
+// ====== User Schema ======
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+})
+
+const User = mongoose.models.User || mongoose.model('User', UserSchema)
+
+// ====== Route POST ======
 export async function POST(req: Request) {
   try {
-    console.log("🔧 POST /api/auth/signup");
-
-    if (!process.env.MONGODB_URI) {
-      console.error('❌ MONGODB_URI missing');
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
-    }
-
-    await dbConnect();
-
-    const data = await req.json();
-    console.log("📦 Request Data:", data);
-
-    const { username, password } = data;
+    await dbConnect()
+    const { username, password } = await req.json()
 
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
 
-    const exists = await User.findOne({ username });
-    if (exists) {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
+    const existingUser = await User.findOne({ username })
+    if (existingUser) {
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
     }
 
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hash });
+    const hash = await bcrypt.hash(password, 10)
+    const user = await User.create({ username, password: hash })
 
-    await UserData.create({
-      username,
-      profile: {
-        fullName: '',
-        email: '',
-        monthlySalary: 0,
-        bio: '',
-        phone: '',
-        dob: '',
-        address: '',
-        gender: 'Other',
-      },
-      expenses: [],
-    });
+    const token = jwt.sign({ userId: user._id, username }, JWT_SECRET, { expiresIn: '7d' })
 
-    const token = signToken({ userId: user._id, username });
-
-    const response = NextResponse.json({ success: true, token }, { status: 201 });
-
-    response.cookies.set({
+    const res = NextResponse.json({ success: true, token }, { status: 201 })
+    res.cookies.set({
       name: 'token',
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       path: '/',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    })
 
-    return response;
-  } catch (error: any) {
-    console.error('🔥 API crashed:', error.message);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return res
+  } catch (err: any) {
+    console.error('🔥 Signup Error:', err.message)
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
