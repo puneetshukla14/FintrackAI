@@ -17,7 +17,7 @@ export function middleware(req: NextRequest) {
   const isProtected = protectedRoutes.some(path => req.nextUrl.pathname.startsWith(path))
 
   if (isProtected && !token) {
-    return NextResponse.redirect(new URL('/sign-in', req.url)) // ✅ FIXED FROM /signin
+    return NextResponse.redirect(new URL('/signin', req.url)) // ✅ FIXED FROM /signin
   }
 
   return NextResponse.next()
