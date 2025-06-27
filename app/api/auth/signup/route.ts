@@ -1,13 +1,11 @@
-// app/api/auth/signup/route.ts
 import { NextResponse } from 'next/server'
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import dbConnect from '@/lib/mongodb' // ✅ use your existing typed function
+import dbConnect from '@/lib/mongodb'
 
-const JWT_SECRET = 'skdjf8329r98u32r98u23r98u23r98u23r98u23r98'
+const JWT_SECRET = process.env.JWT_SECRET as string
 
-// ====== User Schema ======
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -15,12 +13,12 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.models.User || mongoose.model('User', UserSchema)
 
-// ====== Route POST ======
 export async function POST(req: Request) {
   try {
-    await dbConnect() // ✅ proper typed connection
+    await dbConnect()
 
     const { username, password } = await req.json()
+
     if (!username || !password) {
       return NextResponse.json({ error: 'Missing username or password' }, { status: 400 })
     }
