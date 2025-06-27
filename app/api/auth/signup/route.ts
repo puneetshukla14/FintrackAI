@@ -4,45 +4,39 @@ import User from '@/models/user'
 import UserData from '@/models/UserData'
 import bcrypt from 'bcryptjs'
 import { signToken } from '@/lib/jwt'
-
 export async function POST(req: Request) {
   try {
-    await dbConnect()
+    console.log('Connecting to DB...');
+    await dbConnect();
 
-    const { username, password } = await req.json()
+    const { username, password } = await req.json();
+    console.log('Received signup:', { username, password: password ? '***' : null });
 
     if (!username || !password) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+      console.error('Missing fields');
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
     }
 
-    const exists = await User.findOne({ username })
+    const exists = await User.findOne({ username });
+    console.log('Exists:', exists);
     if (exists) {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 })
+      console.error('Username already exists');
+      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
     }
 
-    const hashed = await bcrypt.hash(password, 10)
-    const user = await User.create({ username, password: hashed })
+    const hashed = await bcrypt.hash(password, 10);
+    console.log('Password hashed');
 
-    await UserData.create({
-      username,
-      profile: {
-        fullName: '',
-        monthlySalary: 0,
-        gender: 'Other',
-        email: '',
-        bio: '',
-        phone: '',
-        dob: '',
-        address: ''
-      },
-      expenses: [],
-      credits: []
-    })
+    const user = await User.create({ username, password: hashed });
+    console.log('User created:', user._id);
 
-    const token = signToken({ userId: user._id, username })
+    await UserData.create({ username, profile: {...}, expenses: [], credits: [] });
+    console.log('UserData created');
 
-    // ✅ Set the token cookie using NextResponse
-    const res = NextResponse.redirect(new URL('/setup-profile', req.url)) // redirect after signup
+    const token = signToken({ userId: user._id, username });
+    console.log('Token signed');
+
+    const res = NextResponse.redirect(new URL('/setup-profile', req.url));
     res.cookies.set({
       name: 'token',
       value: token,
@@ -50,12 +44,14 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    })
+      maxAge: 60 * 60 * 24 * 7,
+    });
+    console.log('Cookie set, redirecting…');
 
-    return res
-  } catch (err: any) {
-    console.error('Signup Error:', err.message)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return res;
+  } catch (err) {
+    console.error('🚨 SIGNUP ERROR:', err);
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
+
