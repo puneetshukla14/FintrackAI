@@ -4,7 +4,7 @@ declare global {
   var _mongoose: {
     conn: Mongoose | null
     promise: Promise<Mongoose> | null
-  }
+  } | undefined
 }
 
 export {}
