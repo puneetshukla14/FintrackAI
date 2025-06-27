@@ -25,10 +25,8 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const res = NextResponse.json({ token }, { status: 200 })
-    res.cookies.set({
-      name: 'token',
-      value: token,
+    const response = NextResponse.json({ token }, { status: 200 })
+    response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
@@ -36,7 +34,7 @@ export async function POST(req: Request) {
       maxAge: 60 * 60 * 24 * 7,
     })
 
-    return res
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
