@@ -1,42 +1,40 @@
-import mongoose from 'mongoose';
+import mongoose, { Mongoose } from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
+const MONGODB_URI = process.env.MONGODB_URI as string
 
 if (!MONGODB_URI) {
-  throw new Error('❌ Please define the MONGODB_URI environment variable');
+  throw new Error('❌ Please define the MONGODB_URI environment variable')
 }
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
-// 👇 Define it on globalThis with types
 declare global {
-  var _mongoose: MongooseCache | undefined;
+  var _mongoose: {
+    conn: Mongoose | null
+    promise: Promise<Mongoose> | null
+  } | undefined
 }
 
-const globalWithMongoose = globalThis as typeof globalThis & {
-  _mongoose: MongooseCache;
-};
+const globalWithMongoose = global as typeof globalThis & {
+  _mongoose: {
+    conn: Mongoose | null
+    promise: Promise<Mongoose> | null
+  }
+}
 
 if (!globalWithMongoose._mongoose) {
-  globalWithMongoose._mongoose = { conn: null, promise: null };
+  globalWithMongoose._mongoose = { conn: null, promise: null }
 }
 
-async function dbConnect(): Promise<typeof mongoose> {
-  if (globalWithMongoose._mongoose.conn) {
-    return globalWithMongoose._mongoose.conn;
-  }
+async function dbConnect(): Promise<Mongoose> {
+  if (globalWithMongoose._mongoose.conn) return globalWithMongoose._mongoose.conn
 
   if (!globalWithMongoose._mongoose.promise) {
     globalWithMongoose._mongoose.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
-    });
+    })
   }
 
-  globalWithMongoose._mongoose.conn = await globalWithMongoose._mongoose.promise;
-  return globalWithMongoose._mongoose.conn;
+  globalWithMongoose._mongoose.conn = await globalWithMongoose._mongoose.promise
+  return globalWithMongoose._mongoose.conn
 }
 
-export default dbConnect;
+export default dbConnect
