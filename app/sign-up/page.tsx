@@ -9,7 +9,6 @@ export default function SignUpPage() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -26,17 +25,14 @@ export default function SignUpPage() {
         body: JSON.stringify(form)
       })
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data?.error || 'Signup failed')
+      // This triggers if server responds with redirect
+      if (res.redirected) {
+        window.location.href = res.url
         return
       }
 
-      // ✅ Use router.push to redirect with GET (avoids POST 405 error)
-      if (data.redirect) {
-        router.push(data.redirect)
-      }
+      const data = await res.json()
+      if (!res.ok) setError(data?.error || 'Signup failed')
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
@@ -47,7 +43,6 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-zinc-800 p-4">
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-xl p-6 shadow-xl">
         <h1 className="text-3xl font-bold text-center text-white mb-6">Create Account</h1>
-
         {error && <p className="text-red-400 text-sm text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -75,16 +70,8 @@ export default function SignUpPage() {
                 className="w-full px-4 py-2.5 pr-12 bg-zinc-800 text-white border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3"
-              >
-                {showPassword ? (
-                  <EyeOff size={20} stroke="white" />
-                ) : (
-                  <Eye size={20} stroke="white" />
-                )}
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3">
+                {showPassword ? <EyeOff size={20} stroke="white" /> : <Eye size={20} stroke="white" />}
               </button>
             </div>
           </div>
