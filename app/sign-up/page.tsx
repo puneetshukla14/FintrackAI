@@ -32,7 +32,9 @@ export default function SignUpPage() {
       }
 
       // ✅ All good, redirect to setup profile
-      window.location.href = '/setup-profile'
+      if (data.redirect) {
+  window.location.href = data.redirect
+}
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
