@@ -4,11 +4,12 @@ const protectedRoutes = [
   '/dashboard',
   '/expenses',
   '/wallets',
-  '/calendar',
-  '/ai-assistant',
-  '/reports',
-  '/settings',
-  '/admin'
+  // '/calendar',
+  // '/ai-assistant',
+  // '/reports',
+  // '/settings',
+  // '/admin',
+  // '/import-bank-statement'
 ]
 
 export function middleware(req: NextRequest) {
