@@ -9,6 +9,7 @@ export default function SignUpPage() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -23,18 +24,26 @@ export default function SignUpPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
+        redirect: 'follow' // 👈 allow following redirect
       })
+
+      // ✅ If redirect was followed by browser
+      if (res.redirected) {
+        window.location.href = res.url
+        return
+      }
 
       const data = await res.json()
 
       if (!res.ok) {
-        return setError(data?.error || 'Signup failed')
+        setError(data?.error || 'Signup failed')
+        return
       }
 
-      // ✅ All good, redirect to setup profile
+      // ✅ fallback, if no redirect happened automatically
       if (data.redirect) {
-  window.location.href = data.redirect
-}
+        window.location.href = data.redirect
+      }
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
