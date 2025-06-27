@@ -40,20 +40,18 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const response = new NextResponse(JSON.stringify({ token }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    })
+const response = NextResponse.json({ redirect: '/setup-profile' }, { status: 201 });
+response.cookies.set({
+  name: 'token',
+  value: token,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 7,
+});
+return response;
 
-    response.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    })
 
     return response
   } catch (err: any) {
