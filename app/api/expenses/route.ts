@@ -67,16 +67,26 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect()
 
-    const token = getTokenFromRequest(req)
+    const token = req.headers.get('authorization')?.split(' ')[1]
     if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
-    const decoded = verifyToken(token) as { username: string }
+    let decoded
+    try {
+      decoded = verifyToken(token) as { username: string }
+    } catch (err) {
+      console.error('Token verification failed:', err)
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
 
     const userDoc = await UserData.findOne({ username: decoded.username })
 
-    return NextResponse.json(userDoc?.expenses || [])
+    if (!userDoc) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(userDoc.expenses || [])
   } catch (err) {
     console.error('❌ Error fetching expenses:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
