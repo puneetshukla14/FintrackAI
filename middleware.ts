@@ -18,17 +18,23 @@ export function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl
 
-  // Check if current path is protected
   const isProtected = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   )
 
+  // ✅ Redirect to login if trying to access protected page without auth
   if (isProtected && !token) {
-    // Redirect unauthenticated user to sign-in
     const signInUrl = req.nextUrl.clone()
     signInUrl.pathname = '/sign-in'
-    signInUrl.searchParams.set('redirectedFrom', pathname) // Optional: Track original route
+    signInUrl.searchParams.set('redirectedFrom', pathname)
     return NextResponse.redirect(signInUrl)
+  }
+
+  // ✅ If already logged in, block access to /sign-in and /sign-up
+  if (!isProtected && token && (pathname === '/sign-in' || pathname === '/sign-up')) {
+    const dashboardUrl = req.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    return NextResponse.redirect(dashboardUrl)
   }
 
   return NextResponse.next()
@@ -43,6 +49,8 @@ export const config = {
     '/ai-assistant/:path*',
     '/reports/:path*',
     '/settings/:path*',
-    '/admin/:path*'
+    '/admin/:path*',
+    '/sign-in',
+    '/sign-up'
   ]
 }
