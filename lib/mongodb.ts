@@ -1,32 +1,38 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
+const MONGODB_URI = process.env.MONGODB_URI as string
 
 if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+  throw new Error('Please define the MONGODB_URI environment variable')
 }
 
-interface MongooseGlobal {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
-
+// 👇 Fix: tell TypeScript about global.mongoose
 declare global {
-  var mongoose: MongooseGlobal | undefined;
+  var mongoose: {
+    conn: typeof mongoose | null
+    promise: Promise<typeof mongoose> | null
+  }
 }
 
-// Use fallback to initialize
-const cached = global.mongoose ??= { conn: null, promise: null };
+const globalForMongoose = global as typeof globalThis & {
+  mongoose: {
+    conn: typeof mongoose | null
+    promise: Promise<typeof mongoose> | null
+  }
+}
+
+// 👇 Use globalForMongoose instead of global directly
+globalForMongoose.mongoose ??= { conn: null, promise: null }
 
 async function dbConnect() {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
+  if (globalForMongoose.mongoose.conn) return globalForMongoose.mongoose.conn
+  if (!globalForMongoose.mongoose.promise) {
+    globalForMongoose.mongoose.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
-    });
+    })
   }
-  cached.conn = await cached.promise;
-  return cached.conn;
+  globalForMongoose.mongoose.conn = await globalForMongoose.mongoose.promise
+  return globalForMongoose.mongoose.conn
 }
 
-export default dbConnect;
+export default dbConnect
