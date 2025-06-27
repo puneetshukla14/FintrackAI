@@ -25,18 +25,13 @@ export default function SignUpPage() {
         body: JSON.stringify(form),
       })
 
-      let data: any = {}
-      try {
-        data = await res.json()
-      } catch {
-        return setError('Unexpected server response')
-      }
+      const data = await res.json()
 
       if (!res.ok) {
         return setError(data?.error || 'Signup failed')
       }
 
-      // ✅ Force full reload so middleware sees the cookie
+      // ✅ All good, redirect to setup profile
       window.location.href = '/setup-profile'
     } catch (err) {
       console.error('Signup Error:', err)
@@ -52,7 +47,6 @@ export default function SignUpPage() {
         {error && <p className="text-red-400 text-sm text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
             <input
@@ -65,7 +59,6 @@ export default function SignUpPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">
