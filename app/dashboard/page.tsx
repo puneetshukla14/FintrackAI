@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import SpendingTrendChart from '@/components/dashboard/SpendingTrendChart'
 import Methodgraph from '@/components/dashboard/methodgraph'
 import SalaryCard from '@/components/dashboard/SalaryCard'
-import CategoryChart from '@/components/dashboard/CategoryChart'
+
 
 // app/dashboard/page.tsx or wherever your dashboard is
 
@@ -68,13 +68,6 @@ export default function DashboardPage() {
           <SalaryCard />
         </div>
 
-
-
-
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
-          <CategoryChart />
-        </div>
 
         <div className="w-full aspect-square bg-zinc-900 rounded-2xl p-5 shadow-lg flex flex-col">
           <h2 className="text-white text-lg font-semibold mb-4">Spending Trends</h2>
