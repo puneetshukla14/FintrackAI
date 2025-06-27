@@ -4,12 +4,11 @@ const protectedRoutes = [
   '/dashboard',
   '/expenses',
   '/wallets',
-  // '/calendar',
-  // '/ai-assistant',
-  // '/reports',
-  // '/settings',
-  // '/admin',
-  // '/import-bank-statement'
+  '/calendar',
+  '/ai-assistant',
+  '/reports',
+  '/settings',
+  '/admin'
 ]
 
 export function middleware(req: NextRequest) {
@@ -20,7 +19,6 @@ export function middleware(req: NextRequest) {
 
   if (isProtected && !token) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
- // or /login if you prefer
   }
 
   return NextResponse.next()
