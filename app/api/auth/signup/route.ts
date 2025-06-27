@@ -4,47 +4,52 @@ import User from '@/models/user'
 import UserData from '@/models/UserData'
 import bcrypt from 'bcryptjs'
 import { signToken } from '@/lib/jwt'
-import jwt from 'jsonwebtoken';
 
 export async function POST(req: Request) {
   try {
-    await dbConnect();
+    console.log('Connecting to DB...')
+    await dbConnect()
 
-    const { username, password } = await req.json();
+    const { username, password } = await req.json()
+    console.log('Received:', { username, password })
 
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Missing username or password' }, { status: 400 });
-    }
+    if (!username || !password)
+      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return NextResponse.json({ error: 'Username already exists' }, { status: 409 });
-    }
+    const exists = await User.findOne({ username })
+    console.log('User exists:', exists)
 
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hash });
+    if (exists)
+      return NextResponse.json({ error: 'Username exists' }, { status: 409 })
 
-    const token = jwt.sign(
-      { userId: user._id, username },
-      process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: '7d' }
-    );
+    const hash = await bcrypt.hash(password, 10)
+    console.log('Password hashed')
 
-    const res = NextResponse.json({ success: true, token }, { status: 201 });
+    const user = await User.create({ username, password: hash })
+    console.log('User created')
 
-    res.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    await UserData.create({
+      username,
+      profile: {
+        fullName: '',
+        email: '',
+        monthlySalary: 0,
+        bio: '',
+        phone: '',
+        dob: '',
+        address: '',
+        gender: 'Other' // ✅ fix here
+      },
+      expenses: []
+    })
+    console.log('UserData created')
 
-    return res;
-  } catch (err: any) {
-    console.error('🔥 SIGNUP ERROR:', err.message);
-    return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
+    const token = signToken({ userId: user._id, username })
+    console.log('JWT created')
+
+    return NextResponse.json({ token }, { status: 201 })
+  } catch (error: any) {
+    console.error('Signup Error:', error.message)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
