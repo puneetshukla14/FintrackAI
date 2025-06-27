@@ -32,26 +32,25 @@ export async function POST(req: Request) {
         phone: '',
         dob: '',
         address: '',
-        gender: 'Other'
+        gender: 'Other',
       },
-      expenses: []
-      // credits: [] ✅ Include only if your schema supports it
+      expenses: [],
     })
 
     const token = signToken({ userId: user._id, username })
 
-const response = NextResponse.json({ redirect: '/setup-profile' }, { status: 201 });
-response.cookies.set({
-  name: 'token',
-  value: token,
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-  sameSite: 'lax',
-  maxAge: 60 * 60 * 24 * 7,
-});
-return response;
-
+    // 🔥 Use redirect response, not JSON
+    const response = NextResponse.redirect(new URL('/setup-profile', req.url))
+    
+    response.cookies.set({
+      name: 'token',
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    })
 
     return response
   } catch (err: any) {
