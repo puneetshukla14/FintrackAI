@@ -10,22 +10,15 @@ export default function SetupProfilePage() {
     monthlySalary: '',
     gender: '',
   })
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      try {
-        router.replace('/sign-in')
-      } catch {
-        window.location.href = '/sign-in'
-      }
-    } else {
-      setLoading(false)
-    }
-  }, [router])
+    // 🚫 Token not needed from localStorage; cookie is used automatically by fetch
+    setLoading(false)
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -39,15 +32,11 @@ export default function SetupProfilePage() {
     e.preventDefault()
     setError('')
 
-    const token = localStorage.getItem('token')
-    if (!token) return setError('Unauthorized request')
-
     try {
       const res = await fetch('/api/user/profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           fullName: form.fullName,
@@ -58,24 +47,16 @@ export default function SetupProfilePage() {
 
       const data = await res.json()
 
-      if (res.ok) {
-        localStorage.setItem(
-          'user',
-          JSON.stringify({
-            profile: {
-              fullName: form.fullName,
-              salary: Number(form.monthlySalary),
-              gender: form.gender,
-            },
-          })
-        )
-        router.replace('/dashboard')
-      } else {
-        setError(data.error || 'Error updating profile')
+      if (!res.ok) {
+        setError(data.error || 'Failed to update profile')
+        return
       }
+
+      // ✅ Success — redirect to dashboard
+      router.replace('/dashboard')
     } catch (err) {
       console.error('Profile setup error:', err)
-      setError('Something went wrong')
+      setError('Something went wrong.')
     }
   }
 
