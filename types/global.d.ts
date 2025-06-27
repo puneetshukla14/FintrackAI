@@ -1,11 +1,10 @@
-// This makes TypeScript recognize global._mongoose
-import type mongoose from 'mongoose';
-
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
+import type { Mongoose } from 'mongoose'
 
 declare global {
-  var _mongoose: MongooseCache | undefined;
+  var _mongoose: {
+    conn: Mongoose | null
+    promise: Promise<Mongoose> | null
+  }
 }
+
+export {}
