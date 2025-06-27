@@ -1,4 +1,3 @@
-// /api/auth/signup/route.ts
 import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
@@ -9,6 +8,7 @@ import { signToken } from '@/lib/jwt'
 export async function POST(req: Request) {
   try {
     await dbConnect()
+
     const { username, password } = await req.json()
 
     if (!username || !password) {
@@ -41,9 +41,11 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const res = NextResponse.json({ success: true }, { status: 201 })
-
-    res.cookies.set('token', token, {
+    // ✅ Set the token cookie using NextResponse
+    const res = NextResponse.redirect(new URL('/setup-profile', req.url)) // redirect after signup
+    res.cookies.set({
+      name: 'token',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
@@ -52,8 +54,8 @@ export async function POST(req: Request) {
     })
 
     return res
-  } catch (err) {
-    console.error('Signup Error:', err)
+  } catch (err: any) {
+    console.error('Signup Error:', err.message)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
