@@ -5,7 +5,7 @@ import UserData from '@/models/UserData'
 import bcrypt from 'bcryptjs'
 import { signToken } from '@/lib/jwt'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     await dbConnect()
     const { username, password } = await req.json()
@@ -39,21 +39,22 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-const response = NextResponse.redirect(new URL('/setup-profile', req.url))
-response.cookies.set({
-  name: 'token',
-  value: token,
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-  sameSite: 'lax',
-  maxAge: 60 * 60 * 24 * 7
-})
-return response
+    // ✅ Set cookie
+    const response = NextResponse.redirect(new URL('/setup-profile', req.url), 302)
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    })
 
-
+    return response
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err)
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: err.message || 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
