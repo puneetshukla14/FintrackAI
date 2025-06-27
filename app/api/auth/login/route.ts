@@ -1,4 +1,3 @@
-// /api/auth/login/route.ts
 import { NextResponse } from 'next/server'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/user'
@@ -26,9 +25,14 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const response = NextResponse.json({ token }, { status: 200 })
+    const response = new NextResponse(JSON.stringify({ token }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
 
-    response.cookies.set('token', token, {
+    response.cookies.set({
+      name: 'token',
+      value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/',
