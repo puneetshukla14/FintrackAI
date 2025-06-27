@@ -26,12 +26,6 @@ export default function SignUpPage() {
         body: JSON.stringify(form)
       })
 
-      // ✅ If response is redirected (works in browser)
-      if (res.redirected) {
-        window.location.href = res.url
-        return
-      }
-
       const data = await res.json()
 
       if (!res.ok) {
@@ -39,7 +33,7 @@ export default function SignUpPage() {
         return
       }
 
-      // ✅ fallback redirect (for SSR environments)
+      // ✅ Use router.push to redirect with GET (avoids POST 405 error)
       if (data.redirect) {
         router.push(data.redirect)
       }
