@@ -45,18 +45,18 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username });
 
-    const res = NextResponse.redirect(new URL('/setup-profile', req.url));
-    res.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    });
+const response = NextResponse.json({ success: true }, { status: 201 })
+response.cookies.set({
+  name: 'token',
+  value: token,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 7,
+})
+return response
 
-    return res;
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
