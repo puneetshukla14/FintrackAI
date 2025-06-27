@@ -38,7 +38,9 @@ export default function SignUpPage() {
       }
 
       // ✅ Cookie is set by server, so just redirect
-      router.push('/setup-profile')
+      // ✅ Instead of router.push('/setup-profile')
+     window.location.href = '/setup-profile'
+
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
