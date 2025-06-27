@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function SignUpPage() {
-  const router = useRouter()
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -37,10 +36,8 @@ export default function SignUpPage() {
         return setError(data?.error || 'Signup failed')
       }
 
-      // ✅ Cookie is set by server, so just redirect
-      // ✅ Instead of router.push('/setup-profile')
-     window.location.href = '/setup-profile'
-
+      // ✅ Force full reload so middleware sees the cookie
+      window.location.href = '/setup-profile'
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
