@@ -19,10 +19,12 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   const isProtected = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname === route || pathname.startsWith(route + '/')
   )
 
-  // ✅ Redirect to login if trying to access protected page without auth
+  const isAuthPage = pathname === '/sign-in' || pathname === '/sign-up'
+
+  // ✅ Redirect to login if accessing protected route without token
   if (isProtected && !token) {
     const signInUrl = req.nextUrl.clone()
     signInUrl.pathname = '/sign-in'
@@ -30,8 +32,8 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
-  // ✅ If already logged in, block access to /sign-in and /sign-up
-  if (!isProtected && token && (pathname === '/sign-in' || pathname === '/sign-up')) {
+  // ✅ Prevent logged-in users from seeing auth pages
+  if (token && isAuthPage) {
     const dashboardUrl = req.nextUrl.clone()
     dashboardUrl.pathname = '/dashboard'
     return NextResponse.redirect(dashboardUrl)
