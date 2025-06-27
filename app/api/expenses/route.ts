@@ -19,21 +19,22 @@ function getCategory(desc: string): string {
   return 'Other'
 }
 
+function getTokenFromRequest(req: NextRequest): string | null {
+  const authHeader = req.headers.get('authorization')
+  const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
+  const tokenFromCookie = req.cookies.get('token')?.value
+  return tokenFromHeader || tokenFromCookie || null
+}
+
 // ✅ POST /api/expenses
 export async function POST(req: NextRequest) {
   try {
     await dbConnect()
 
-    const token = req.headers.get('authorization')?.split(' ')[1]
+    const token = getTokenFromRequest(req)
     if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
-    let decoded
-    try {
-      decoded = verifyToken(token) as { username: string }
-    } catch (err) {
-      console.error('Token verification failed:', err)
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
+    const decoded = verifyToken(token) as { username: string }
 
     const { amount, description = 'No description', date, category } = await req.json()
 
@@ -66,21 +67,16 @@ export async function GET(req: NextRequest) {
   try {
     await dbConnect()
 
-    const token = req.headers.get('authorization')?.split(' ')[1]
+    const token = getTokenFromRequest(req)
     if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
-    let decoded
-    try {
-      decoded = verifyToken(token) as { username: string }
-    } catch (err) {
-      console.error('Token verification failed:', err)
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
+    const decoded = verifyToken(token) as { username: string }
 
     const userDoc = await UserData.findOne({ username: decoded.username })
+
     return NextResponse.json(userDoc?.expenses || [])
   } catch (err) {
     console.error('❌ Error fetching expenses:', err)
-    return NextResponse.json([], { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
