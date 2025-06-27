@@ -37,7 +37,7 @@ export default function SignUpPage() {
       }
 
       // ✅ Force full reload so middleware sees the cookie
-      router.push('/setup-profile')
+      window.location.href = '/setup-profile'
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
