@@ -39,17 +39,18 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const response = NextResponse.redirect(new URL('/setup-profile', req.url)) // ✅ REAL REDIRECT
-    response.cookies.set({
-      name: 'token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-    })
-    return response
+const response = NextResponse.redirect(new URL('/setup-profile', req.url))
+response.cookies.set({
+  name: 'token',
+  value: token,
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 7
+})
+return response
+
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err)
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
