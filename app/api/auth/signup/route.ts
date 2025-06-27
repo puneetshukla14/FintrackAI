@@ -34,13 +34,13 @@ export async function POST(req: NextRequest) {
         address: '',
         gender: 'Other'
       },
-      expenses: []
+      expenses: [],
+      credits: []
     })
 
     const token = signToken({ userId: user._id, username })
 
-    // ✅ Set cookie
-    const response = NextResponse.redirect(new URL('/setup-profile', req.url), 302)
+    const response = NextResponse.redirect(new URL('/setup-profile', req.url))
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -52,9 +52,6 @@ export async function POST(req: NextRequest) {
     return response
   } catch (err: any) {
     console.error('🚨 SIGNUP ERROR:', err)
-    return NextResponse.json(
-      { error: err.message || 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
