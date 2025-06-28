@@ -1,39 +1,79 @@
 'use client'
 
-import './globals.css'
-import { useEffect, useState } from 'react'
-import SidebarWrapper from './SidebarWrapper'
-import Loading from '@/components/loading'
+import React, { useState, useEffect } from 'react'
 
-export const metadata = {
-  title: 'ExpenseX Pro',
-  description: 'Smart Expense Manager',
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const [showLoader, setShowLoader] = useState(true)
+const Loading = () => {
+  const [show, setShow] = useState(true)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Loader should appear every refresh
-      sessionStorage.removeItem('hasReloaded') // 👈 clear previous flag
-
-      sessionStorage.setItem('hasReloaded', 'true')
-      setShowLoader(true)
-      const timer = setTimeout(() => {
-        setShowLoader(false)
-        sessionStorage.removeItem('hasReloaded') // 👈 clear again after showing
-      }, 3000)
-
-      return () => clearTimeout(timer)
-    }
+    const timer = setTimeout(() => setShow(false), 3000)
+    return () => clearTimeout(timer)
   }, [])
 
+  if (!show) return null
+
   return (
-    <html lang="en">
-      <body className="bg-black text-white">
-        {showLoader ? <Loading /> : <SidebarWrapper>{children}</SidebarWrapper>}
-      </body>
-    </html>
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'black',
+        overflow: 'hidden',
+        zIndex: 9999,
+      }}
+    >
+      <h1
+        style={{
+          fontFamily: "'Oswald', sans-serif",
+          fontSize: '11vmin',
+          fontWeight: 600,
+          letterSpacing: '0.1em',
+          textAlign: 'center',
+          background: 'linear-gradient(to right, rgb(0, 255, 255), rgb(53, 53, 240))',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          animation: 'netflix_style 4.5s ease-out',
+          whiteSpace: 'nowrap',
+          zIndex: 1,
+        }}
+      >
+        PVA
+      </h1>
+
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&display=swap');
+
+        @keyframes netflix_style {
+          0% {
+            text-shadow: 0px 0px transparent, 100px 100px #aaa;
+            transform: scale(1.5);
+            color: #f3f3f3;
+          }
+          10% {
+            text-shadow: 1.5px 1.5px #aaa;
+          }
+          20% {
+            color: #e90418;
+            text-shadow: none;
+            transform: scale(1.1);
+          }
+          80% {
+            opacity: 0;
+            transform: scale(0.85);
+          }
+          100% {
+            opacity: 0;
+          }
+        }
+      `}</style>
+    </div>
   )
 }
+
+export default Loading
