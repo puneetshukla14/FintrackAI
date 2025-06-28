@@ -12,8 +12,7 @@ const protectedRoutes = [
 ]
 
 export function middleware(req: NextRequest) {
-  const token =
-    req.cookies.get('token')?.value || req.headers.get('authorization')?.replace('Bearer ', '')
+  const token = req.cookies.get('token')?.value
 
   const isProtected = protectedRoutes.some(path => req.nextUrl.pathname.startsWith(path))
 
