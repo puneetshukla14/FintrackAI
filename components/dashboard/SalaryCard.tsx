@@ -196,30 +196,40 @@ const currencySymbols: Record<string, string> = {
           </div>
         </div>
       </div>
+{/* Stats */}
+<div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
+  <div className="flex justify-between">
+    <span>Base Salary</span>
+    <span className="font-medium text-sky-400">
+      {currencySymbols[currency]}{Math.round(baseSalary * conversionRate).toLocaleString()}
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span>Added Money</span>
+    <span className="font-medium text-green-400">
+      + {currencySymbols[currency]}{Math.round(credits * conversionRate).toLocaleString()}
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span>Total Funds</span>
+    <span className="font-medium text-white">
+      {currencySymbols[currency]}{Math.round(totalFunds * conversionRate).toLocaleString()}
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span>Total Spent</span>
+    <span className="font-medium text-rose-400">
+      {currencySymbols[currency]}{Math.round(expenses * conversionRate).toLocaleString()}
+    </span>
+  </div>
+  <div className="flex justify-between">
+    <span>Remaining</span>
+    <span className="font-medium text-emerald-400">
+      {currencySymbols[currency]}{Math.round(remaining * conversionRate).toLocaleString()}
+    </span>
+  </div>
+</div>
 
-      {/* Stats */}
-      <div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
-        <div className="flex justify-between">
-          <span>Base Salary</span>
-          <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Added Money</span>
-          <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Total Funds</span>
-          <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Total Spent</span>
-          <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Remaining</span>
-          <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
-        </div>
-      </div>
 
       {progress < 30 && (
         <p className="mt-4 text-xs text-amber-400 text-center italic">
