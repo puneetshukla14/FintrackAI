@@ -20,24 +20,32 @@ function getCategory(desc: string): string {
 }
 
 function getTokenFromRequest(req: NextRequest): string | null {
+  const cookieToken = req.cookies.get('token')?.value
   const authHeader = req.headers.get('authorization')
-  const tokenFromHeader = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
-  const tokenFromCookie = req.cookies.get('token')?.value
-  return tokenFromHeader || tokenFromCookie || null
+  const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null
+  return cookieToken || headerToken || null
 }
 
-// ✅ POST /api/expenses
+// ✅ POST: Add new expense
 export async function POST(req: NextRequest) {
   try {
     await dbConnect()
-    const token = getTokenFromRequest(req)
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const decoded = verifyToken(token) as { username: string }
+    const token = getTokenFromRequest(req)
+    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
+
+    let decoded
+    try {
+      decoded = verifyToken(token) as { username: string }
+    } catch (err) {
+      console.error('❌ Token verify failed (POST):', err)
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+
     const { amount, description = 'No description', date, category } = await req.json()
 
-    if (typeof amount !== 'number') {
-      return NextResponse.json({ error: 'Amount must be a number' }, { status: 400 })
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return NextResponse.json({ error: 'Amount must be a valid number' }, { status: 400 })
     }
 
     const expense: Expense = {
@@ -53,27 +61,42 @@ export async function POST(req: NextRequest) {
       { new: true }
     )
 
-    return NextResponse.json({ success: true, data: update?.expenses || [] })
+    if (!update) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data: update.expenses })
   } catch (err) {
-    console.error('❌ Error saving expense:', err)
+    console.error('❌ Error in POST /api/expenses:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// ✅ GET /api/expenses
+// ✅ GET: Get all expenses
 export async function GET(req: NextRequest) {
   try {
     await dbConnect()
+
     const token = getTokenFromRequest(req)
-    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
-    const decoded = verifyToken(token) as { username: string }
+    let decoded
+    try {
+      decoded = verifyToken(token) as { username: string }
+    } catch (err) {
+      console.error('❌ Token verify failed (GET):', err)
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+
     const userDoc = await UserData.findOne({ username: decoded.username })
-    if (!userDoc) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-    return NextResponse.json(userDoc.expenses || [])
+    if (!userDoc) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, expenses: userDoc.expenses || [] })
   } catch (err) {
-    console.error('❌ Error fetching expenses:', err)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    console.error('❌ Error in GET /api/expenses:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
