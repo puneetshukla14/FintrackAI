@@ -133,18 +133,28 @@ export default function Sidebar() {
       >
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-          <h1 className="text-lg font-bold text-white tracking-wide">ExpenseX Pro</h1>
-          {isMobile && (
-            <button
-              className="text-zinc-400 hover:text-white"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X size={20} />
-            </button>
-          )}
-        </div>
+{/* Header */}
+<div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+  <Link href="/dashboard" className="flex items-center gap-3 group">
+    <img
+      src="/logo.webp"
+      alt="Logo"
+      className="w-8 h-8 rounded-sm object-contain group-hover:scale-105 transition-transform"
+    />
+    <h1 className="text-lg font-bold text-white tracking-wide group-hover:text-blue-400 transition-colors">
+      ExpenseX Pro
+    </h1>
+  </Link>
+  {isMobile && (
+    <button
+      className="text-zinc-400 hover:text-white"
+      onClick={() => setSidebarOpen(false)}
+    >
+      <X size={20} />
+    </button>
+  )}
+</div>
+
 
         {/* Links */}
         <div className="flex-1 overflow-y-auto px-3 py-3">
