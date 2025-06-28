@@ -30,12 +30,10 @@ function getTokenFromRequest(req: NextRequest): string | null {
 export async function POST(req: NextRequest) {
   try {
     await dbConnect()
-
     const token = getTokenFromRequest(req)
-    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const decoded = verifyToken(token) as { username: string }
-
     const { amount, description = 'No description', date, category } = await req.json()
 
     if (typeof amount !== 'number') {
@@ -66,23 +64,12 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     await dbConnect()
+    const token = getTokenFromRequest(req)
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const token = req.headers.get('authorization')?.split(' ')[1]
-    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
-
-    let decoded
-    try {
-      decoded = verifyToken(token) as { username: string }
-    } catch (err) {
-      console.error('Token verification failed:', err)
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
-
+    const decoded = verifyToken(token) as { username: string }
     const userDoc = await UserData.findOne({ username: decoded.username })
-
-    if (!userDoc) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
+    if (!userDoc) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     return NextResponse.json(userDoc.expenses || [])
   } catch (err) {
