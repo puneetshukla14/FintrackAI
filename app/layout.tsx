@@ -3,7 +3,7 @@ import SidebarWrapper from './SidebarWrapper'
 import ClientLoader from '@/components/ClientLoader' // 👈 client component wrapper
 
 export const metadata = {
-  title: 'ExpenseX Pro',
+  title: 'Fintrack',
   description: 'Smart Expense Manager',
 }
 
