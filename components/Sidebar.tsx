@@ -134,17 +134,18 @@ export default function Sidebar() {
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
 {/* Header */}
-<div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
+<div className="flex items-center justify-center relative px-5 py-4 border-b border-zinc-800">
   <Link href="/dashboard" className="block">
     <img
       src="/logo.webp"
       alt="Logo"
-      className="w-10 h-10 object-contain rounded-sm hover:scale-105 transition-transform"
+      className="w-12 h-12 object-contain hover:scale-110 transition-transform"
     />
   </Link>
+
   {isMobile && (
     <button
-      className="text-zinc-400 hover:text-white"
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
       onClick={() => setSidebarOpen(false)}
     >
       <X size={20} />
@@ -152,6 +153,10 @@ export default function Sidebar() {
   )}
 </div>
 
+
+
+
+        
 
         {/* Links */}
         <div className="flex-1 overflow-y-auto px-3 py-3">
