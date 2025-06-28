@@ -1,24 +1,23 @@
+// middleware.ts
 import { NextRequest, NextResponse } from 'next/server'
 
-const protectedRoutes = [
-  '/dashboard',
-  '/expenses',
-  '/wallets',
-  '/calendar',
-  '/ai-assistant',
-  '/reports',
-  '/settings',
-  '/admin'
-]
-
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get('token')?.value
+  const token =
+    req.cookies.get('token')?.value ||
+    req.headers.get('authorization')?.replace('Bearer ', '')
 
-  const isProtected = protectedRoutes.some(path =>
-    req.nextUrl.pathname.startsWith(path)
-  )
+  const isProtectedRoute = [
+    '/dashboard',
+    '/expenses',
+    '/wallets',
+    '/calendar',
+    '/ai-assistant',
+    '/reports',
+    '/settings',
+    '/admin'
+  ].some((route) => req.nextUrl.pathname.startsWith(route))
 
-  if (isProtected && !token) {
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
@@ -26,5 +25,14 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: protectedRoutes.map(route => `${route}/:path*`)
+  matcher: [
+    '/dashboard/:path*',
+    '/expenses/:path*',
+    '/wallets/:path*',
+    '/calendar/:path*',
+    '/ai-assistant/:path*',
+    '/reports/:path*',
+    '/settings/:path*',
+    '/admin/:path*'
+  ]
 }
