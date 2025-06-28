@@ -25,18 +25,15 @@ export async function POST(req: Request) {
 
     const token = signToken({ userId: user._id, username })
 
-    const response = new NextResponse(JSON.stringify({ token }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    const response = NextResponse.json({ success: true }, { status: 200 })
 
     response.cookies.set({
       name: 'token',
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      path: '/',
       sameSite: 'lax',
+      path: '/',
       maxAge: 60 * 60 * 24 * 7,
     })
 
