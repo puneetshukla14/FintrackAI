@@ -43,7 +43,7 @@ const Loading = () => {
           zIndex: 1,
         }}
       >
-        PVA
+        FINTRACK V.7.0.25
       </h1>
 
       <style jsx>{`
