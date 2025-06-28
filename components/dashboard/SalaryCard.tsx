@@ -10,6 +10,27 @@ export default function SavingsProgressChart() {
   const [expenses, setExpenses] = useState(0)
   const [progress, setProgress] = useState(0)
   const [displayProgress, setDisplayProgress] = useState(0)
+const [currency, setCurrency] = useState('INR')
+const [conversionRate, setConversionRate] = useState(1)
+
+const conversionRates: Record<string, number> = {
+  INR: 1,
+  USD: 0.012,
+  EUR: 0.011,
+  GBP: 0.0095,
+  JPY: 1.75,
+  AED: 0.044,
+}
+
+const currencySymbols: Record<string, string> = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  AED: 'د.إ',
+}
+
 
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
@@ -94,20 +115,37 @@ export default function SavingsProgressChart() {
       animate={{ opacity: 1, y: 0 }}
     >
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
-          <p className="text-xs text-zinc-400">Real-time savings insights</p>
-        </div>
-        <motion.button
-          onClick={handleRefresh}
-          animate={iconControls}
-          whileHover={{ scale: 1.1 }}
-          className="text-purple-400 hover:text-purple-300 transition-colors"
-        >
-          <RotateCcw size={20} />
-        </motion.button>
-      </div>
+<div className="flex justify-between items-center mb-4">
+  <div>
+    <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
+    <p className="text-xs text-zinc-400">Real-time savings insights</p>
+  </div>
+  <div className="flex items-center gap-3">
+    <select
+      value={currency}
+      onChange={(e) => {
+        setCurrency(e.target.value)
+        setConversionRate(conversionRates[e.target.value])
+      }}
+      className="bg-zinc-800 text-xs text-white border border-zinc-700 rounded-md px-2 py-1 focus:outline-none hover:border-cyan-500 transition"
+    >
+      {Object.keys(conversionRates).map((cur) => (
+        <option key={cur} value={cur}>
+          {currencySymbols[cur]} {cur}
+        </option>
+      ))}
+    </select>
+
+    <motion.button
+      onClick={handleRefresh}
+      animate={iconControls}
+      whileHover={{ scale: 1.1 }}
+      className="text-purple-400 hover:text-purple-300 transition-colors"
+    >
+      <RotateCcw size={20} />
+    </motion.button>
+  </div>
+</div>
 
       {/* Circular Progress */}
       <div className="flex justify-center items-center mt-6">
