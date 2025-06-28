@@ -15,19 +15,11 @@ export default function SavingsProgressChart() {
   const strokeControls = useAnimation()
 
   const fetchData = async () => {
-    const token = localStorage.getItem('token') || ''
-
     try {
       const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/expenses', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/credits', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        fetch('/api/user/salary', { credentials: 'include' }),
+        fetch('/api/expenses', { credentials: 'include' }),
+        fetch('/api/credits', { credentials: 'include' }),
       ])
 
       const salaryData = await salaryRes.json()
@@ -62,7 +54,7 @@ export default function SavingsProgressChart() {
       setExpenses(totalExpense)
       setProgress(Math.round(percentage))
     } catch (err) {
-      console.error('Failed to fetch data:', err)
+      console.error('Savings chart fetch error:', err)
     }
   }
 
@@ -117,7 +109,6 @@ export default function SavingsProgressChart() {
           <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
           <p className="text-xs text-zinc-400">Real-time savings insights</p>
         </div>
-
         <motion.button
           onClick={handleRefresh}
           animate={iconControls}
@@ -129,93 +120,76 @@ export default function SavingsProgressChart() {
       </div>
 
       {/* Circular Progress */}
-  
-        <div className="flex justify-center items-center mt-6">
-  <div className="relative w-36 h-36">
-    {/* Background glow */}
-    <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
-
-    {/* SVG circle with viewBox for proper centering */}
-    <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
-      <circle
-        cx="72"
-        cy="72"
-        r="60"
-        className="stroke-zinc-800"
-        strokeWidth="10"
-        fill="none"
-      />
-      <motion.circle
-        cx="72"
-        cy="72"
-        r="60"
-        stroke="url(#gradient)"
-        strokeWidth="10"
-        fill="none"
-        strokeDasharray="377"
-        strokeDashoffset="377"
-        strokeLinecap="round"
-        animate={strokeControls}
-        style={{
-          transition: 'stroke-dashoffset 1s ease-in-out',
-          filter: 'drop-shadow(0 0 6px #0ea5e9)',
-        }}
-      />
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#06b6d4" />
-          <stop offset="50%" stopColor="#3b82f6" />
-          <stop offset="100%" stopColor="#8b5cf6" />
-        </linearGradient>
-      </defs>
-    </svg>
-
-    {/* Centered text container */}
-    <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
-      <div className="flex flex-col items-center">
-        <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
-          {displayProgress}%
-        </span>
-        <span className="text-xs text-cyan-400 mt-[-7] font-medium opacity-90">
-          <span className="text-base font-bold">₹</span> Saved
-        </span>
+      <div className="flex justify-center items-center mt-6">
+        <div className="relative w-36 h-36">
+          <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
+          <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
+            <circle
+              cx="72"
+              cy="72"
+              r="60"
+              className="stroke-zinc-800"
+              strokeWidth="10"
+              fill="none"
+            />
+            <motion.circle
+              cx="72"
+              cy="72"
+              r="60"
+              stroke="url(#gradient)"
+              strokeWidth="10"
+              fill="none"
+              strokeDasharray="377"
+              strokeDashoffset="377"
+              strokeLinecap="round"
+              animate={strokeControls}
+              style={{
+                transition: 'stroke-dashoffset 1s ease-in-out',
+                filter: 'drop-shadow(0 0 6px #0ea5e9)',
+              }}
+            />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="50%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#8b5cf6" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
+            <div className="flex flex-col items-center">
+              <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
+                {displayProgress}%
+              </span>
+              <span className="text-xs text-cyan-400 mt-[-7] font-medium opacity-90">
+                <span className="text-base font-bold">₹</span> Saved
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
-
 
       {/* Stats Breakdown */}
       <div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
         <div className="flex justify-between">
           <span>Base Salary</span>
-          <span className="font-medium text-sky-400">
-            ₹{baseSalary.toLocaleString()}
-          </span>
+          <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Added Money</span>
-          <span className="font-medium text-green-400">
-            + ₹{credits.toLocaleString()}
-          </span>
+          <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Total Funds</span>
-          <span className="font-medium text-white">
-            ₹{totalFunds.toLocaleString()}
-          </span>
+          <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Total Spent</span>
-          <span className="font-medium text-rose-400">
-            ₹{expenses.toLocaleString()}
-          </span>
+          <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span>Remaining</span>
-          <span className="font-medium text-emerald-400">
-            ₹{remaining.toLocaleString()}
-          </span>
+          <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
         </div>
       </div>
 
