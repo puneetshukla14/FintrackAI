@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import SalaryCard from '@/components/dashboard/SalaryCard'
+import SpendingTrendChart from '@/components/dashboard/SpendingTrendChart'
+import Methodgraph from '@/components/dashboard/methodgraph'
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
@@ -70,6 +72,17 @@ export default function DashboardPage() {
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="w-full aspect-square bg-zinc-900 rounded-2xl p-5 shadow-lg flex flex-col">
           <SalaryCard />
+        </div>
+
+
+        <div className="w-full aspect-square bg-zinc-900 rounded-2xl p-5 shadow-lg flex flex-col">
+          <h2 className="text-white text-lg font-semibold mb-4">Spending Trends</h2>
+          <SpendingTrendChart />
+        </div>
+
+        <div className="w-full aspect-square bg-zinc-900 rounded-2xl p-5 shadow-lg flex flex-col">
+          <h2 className="text-white text-lg font-semibold mb-4">Payment Method Breakdown</h2>
+          <Methodgraph />
         </div>
       </section>
     </main>
