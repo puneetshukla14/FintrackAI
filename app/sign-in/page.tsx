@@ -23,21 +23,17 @@ export default function SignInPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
+        credentials: 'include', // ✅ send token cookie
       })
 
-      let data: any = {}
-      try {
-        data = await res.json()
-      } catch {
-        return setError('Unexpected server response')
-      }
+      const data = await res.json()
 
       if (!res.ok) {
         console.error('Login failed:', data)
         return setError(data?.error || 'Login failed')
       }
 
-      // ✅ Force full-page reload so cookie is respected by middleware
+      // ✅ Force full-page reload so HttpOnly cookie works with middleware
       window.location.href = '/dashboard'
     } catch (err) {
       console.error('Login error:', err)
