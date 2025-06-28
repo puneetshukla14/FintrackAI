@@ -133,14 +133,31 @@ export default function Sidebar() {
       >
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
+<style jsx global>{`
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+`}</style>
+
 {/* Header */}
-<div className="flex items-center justify-center relative px-5 py-4 border-b border-zinc-800">
-  <Link href="/dashboard" className="block">
-    <img
-      src="/logo.webp"
-      alt="Logo"
-      className="w-12 h-12 object-contain hover:scale-110 transition-transform"
-    />
+<div className="flex items-center justify-center relative px-5 py-6 border-b border-zinc-800">
+  <Link href="/dashboard" className="block relative group">
+    <div className="relative w-16 h-16">
+      <img
+        src="/logo.webp"
+        alt="Logo"
+        className="w-full h-full object-contain hover:scale-110 transition-transform duration-200"
+      />
+      {/* Shine overlay */}
+      <div className="absolute inset-0 overflow-hidden rounded-sm">
+        <div className="absolute top-0 left-[-75%] w-1/2 h-full bg-white/20 blur-sm rotate-[25deg] animate-shine" />
+      </div>
+    </div>
   </Link>
 
   {isMobile && (
@@ -148,10 +165,11 @@ export default function Sidebar() {
       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
       onClick={() => setSidebarOpen(false)}
     >
-      <X size={20} />
+      <X size={24} />
     </button>
   )}
 </div>
+
 
 
 
