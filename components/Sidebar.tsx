@@ -134,13 +134,11 @@ export default function Sidebar() {
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
 {/* Header */}
-<div className="flex items-center justify-center relative px-5 py-2 border-b border-zinc-800">
-  <Link href="/dashboard" className="block w-24 h-24 overflow-hidden">
-    <img
-      src="/logo.png"
-      alt="Logo"
-      className="w-full h-full object-contain transform transition-transform duration-300 hover:scale-125"
-    />
+<div className="flex justify-center items-center px-0 py-3 border-b border-zinc-800">
+  <Link href="/dashboard">
+    <h1 className="text-[26px] font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent transition-transform duration-300 hover:scale-110">
+      Fintrack<span className="text-white font-light"> Pro</span>
+    </h1>
   </Link>
 
   {isMobile && (
