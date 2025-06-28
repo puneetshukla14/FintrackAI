@@ -196,6 +196,9 @@ const currencySymbols: Record<string, string> = {
           </div>
         </div>
       </div>
+
+
+      
 {/* Stats */}
 <div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
   <div className="flex justify-between">
@@ -229,6 +232,7 @@ const currencySymbols: Record<string, string> = {
     </span>
   </div>
 </div>
+
 
 
       {progress < 30 && (
