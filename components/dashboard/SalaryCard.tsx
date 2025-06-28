@@ -34,17 +34,10 @@ export default function SavingsProgressChart() {
         ? creditsData
         : creditsData?.data || []
 
-      const totalExpense = expenseList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-
-      const totalCredit = creditList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-
+      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
+      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
       const base = salaryData?.data?.salary || 0
+
       const totalFunds = base + totalCredit
       const remaining = Math.max(totalFunds - totalExpense, 0)
       const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
@@ -86,10 +79,7 @@ export default function SavingsProgressChart() {
   }, [progress])
 
   const handleRefresh = async () => {
-    iconControls.start({
-      rotate: 360,
-      transition: { duration: 0.6, ease: 'easeInOut' },
-    })
+    iconControls.start({ rotate: 360, transition: { duration: 0.6, ease: 'easeInOut' } })
     await fetchData()
     iconControls.set({ rotate: 0 })
   }
@@ -161,7 +151,7 @@ export default function SavingsProgressChart() {
               <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
                 {displayProgress}%
               </span>
-              <span className="text-xs text-cyan-400 mt-[-7] font-medium opacity-90">
+              <span className="text-xs text-cyan-400 font-medium opacity-90 -mt-1">
                 <span className="text-base font-bold">₹</span> Saved
               </span>
             </div>
@@ -169,7 +159,7 @@ export default function SavingsProgressChart() {
         </div>
       </div>
 
-      {/* Stats Breakdown */}
+      {/* Stats */}
       <div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
         <div className="flex justify-between">
           <span>Base Salary</span>
@@ -193,7 +183,6 @@ export default function SavingsProgressChart() {
         </div>
       </div>
 
-      {/* Saving Tip */}
       {progress < 30 && (
         <p className="mt-4 text-xs text-amber-400 text-center italic">
           Tip: Try to save at least 50% of your funds this month!
