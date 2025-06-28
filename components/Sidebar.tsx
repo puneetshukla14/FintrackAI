@@ -222,11 +222,20 @@ export default function Sidebar() {
             <span className="text-sm">Logout</span>
           </button>
 
-          {/* Version */}
-          <div className="mt-3 text-xs text-zinc-500 px-2 flex justify-between">
-            <span>v1.0 • ExpenseX Pro</span>
-            <span className="text-[10px] text-blue-600">Puneet Shukla Tech</span>
-          </div>
+   
+{/* Version */}
+<div className="mt-3 text-xs text-zinc-500 px-2 flex justify-between items-center">
+  <span>v7.25 • Fintrack Premium</span>
+  <a
+    href="https://puneetshuklaprofile.netlify.app/" // 🧭 Change to your actual domain if needed
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-[10px] text-blue-600 border border-blue-600 rounded-full px-2 py-[2px] hover:bg-blue-600 hover:text-white transition-all duration-200"
+  >
+    Puneet Shukla
+  </a>
+</div>
+
 
           {/* Dev Toggle (Mobile Only) */}
           {isMobile && (
