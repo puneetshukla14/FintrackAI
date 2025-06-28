@@ -121,16 +121,17 @@ export default function Sidebar() {
         />
       )}
 
-      <motion.aside
-        initial={{ x: -300 }}
-        animate={{ x: sidebarOpen || !isMobile ? 0 : -300 }}
-        transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-        className={clsx(
-          'fixed top-0 left-0 z-50 h-screen w-64 flex flex-col justify-between',
-          'bg-zinc-950/90 backdrop-blur-md border-r border-zinc-800',
-          'md:block'
-        )}
-      >
+<motion.aside
+  initial={{ x: -300 }}
+  animate={{ x: sidebarOpen || !isMobile ? 0 : -300 }}
+  transition={{ type: 'spring', stiffness: 120, damping: 20 }}
+  className={clsx(
+    'fixed top-0 left-0 z-50 min-h-screen w-64 flex flex-col justify-between', // 👈 changed `h-screen` to `min-h-screen`
+    'relative bg-zinc-950/90 backdrop-blur-md border-r border-zinc-800', // 👈 added `relative`
+    'md:block'
+  )}
+>
+
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
         {/* Header */}
