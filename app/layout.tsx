@@ -14,19 +14,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [showLoader, setShowLoader] = useState(true)
 
   useEffect(() => {
-    // Force loader on every hard reload
     if (typeof window !== 'undefined') {
-      const hasReloaded = sessionStorage.getItem('hasReloaded')
+      // Loader should appear every refresh
+      sessionStorage.removeItem('hasReloaded') // 👈 clear previous flag
 
-      if (!hasReloaded) {
-        sessionStorage.setItem('hasReloaded', 'true')
-        setShowLoader(true)
-        setTimeout(() => {
-          setShowLoader(false)
-        }, 3000)
-      } else {
+      sessionStorage.setItem('hasReloaded', 'true')
+      setShowLoader(true)
+      const timer = setTimeout(() => {
         setShowLoader(false)
-      }
+        sessionStorage.removeItem('hasReloaded') // 👈 clear again after showing
+      }, 3000)
+
+      return () => clearTimeout(timer)
     }
   }, [])
 
