@@ -14,8 +14,9 @@ const protectedRoutes = [
 export function middleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value
 
-  const isProtected = protectedRoutes.some(path => req.nextUrl.pathname.startsWith(path))
+  const isProtected = protectedRoutes.some((path) => req.nextUrl.pathname.startsWith(path))
 
+  // 🛑 Token not present, redirect to login
   if (isProtected && !token) {
     return NextResponse.redirect(new URL('/sign-in', req.url))
   }
@@ -32,6 +33,6 @@ export const config = {
     '/ai-assistant/:path*',
     '/reports/:path*',
     '/settings/:path*',
-    '/admin/:path*'
-  ]
+    '/admin/:path*',
+  ],
 }
