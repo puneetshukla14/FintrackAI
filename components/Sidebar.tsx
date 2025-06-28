@@ -137,7 +137,7 @@ export default function Sidebar() {
 <div className="flex items-center justify-center relative px-5 py-8 border-b border-zinc-800">
   <Link href="/dashboard" className="block">
     <img
-      src="/logo.webp"
+      src="/logo.png"
       alt="Logo"
       className="w-24 h-24 object-contain hover:scale-110 transition-transform duration-200"
     />
