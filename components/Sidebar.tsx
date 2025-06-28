@@ -135,11 +135,11 @@ export default function Sidebar() {
 
 {/* Header */}
 <div className="flex items-center justify-center relative px-5 py-2 border-b border-zinc-800">
-  <Link href="/dashboard" className="block">
+  <Link href="/dashboard" className="block w-24 h-24 overflow-hidden">
     <img
       src="/logo.png"
       alt="Logo"
-      className="w-24 h-24 object-contain hover:scale-110 transition-transform duration-200"
+      className="w-full h-full object-contain transform transition-transform duration-300 hover:scale-125"
     />
   </Link>
 
@@ -152,6 +152,7 @@ export default function Sidebar() {
     </button>
   )}
 </div>
+
 
 
 
