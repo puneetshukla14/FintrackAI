@@ -225,7 +225,7 @@ export default function Sidebar() {
    
 {/* Version */}
 <div className="mt-3 text-xs text-zinc-500 px-2 flex justify-between items-center">
-  <span>v7.25 • Fintrack Premium</span>
+  <span>V7.25 • Fintrack Premium</span>
   <a
     href="https://puneetshuklaprofile.netlify.app/" // 🧭 Change to your actual domain if needed
     target="_blank"
