@@ -134,7 +134,7 @@ export default function Sidebar() {
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
 
 {/* Header */}
-<div className="flex items-center justify-center relative px-5 py-8 border-b border-zinc-800">
+<div className="flex items-center justify-center relative px-5 py-2 border-b border-zinc-800">
   <Link href="/dashboard" className="block">
     <img
       src="/logo.png"
@@ -152,7 +152,6 @@ export default function Sidebar() {
     </button>
   )}
 </div>
-
 
 
 
