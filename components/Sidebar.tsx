@@ -135,15 +135,12 @@ export default function Sidebar() {
 
 {/* Header */}
 <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-  <Link href="/dashboard" className="flex items-center gap-3 group">
+  <Link href="/dashboard" className="block">
     <img
       src="/logo.webp"
       alt="Logo"
-      className="w-8 h-8 rounded-sm object-contain group-hover:scale-105 transition-transform"
+      className="w-10 h-10 object-contain rounded-sm hover:scale-105 transition-transform"
     />
-    <h1 className="text-lg font-bold text-white tracking-wide group-hover:text-blue-400 transition-colors">
-      ExpenseX Pro
-    </h1>
   </Link>
   {isMobile && (
     <button
