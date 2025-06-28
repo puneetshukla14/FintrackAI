@@ -3,18 +3,12 @@ import dbConnect from '@/lib/mongodb'
 import UserData from '@/models/UserData'
 import { verifyToken } from '@/lib/auth'
 
-// 🚀 POST: Update User Profile
 export async function POST(req: NextRequest) {
   await dbConnect()
-
   try {
-    const token =
-      req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
-
+    const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
     const decoded = token && verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { fullName, monthlySalary, gender } = await req.json()
     if (!fullName || !monthlySalary || !gender) {
@@ -40,24 +34,15 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ✅ GET: Fetch User Profile
 export async function GET(req: NextRequest) {
   await dbConnect()
-
   try {
-    const token =
-      req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
-
+    const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
     const decoded = token && verifyToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    if (!decoded) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const user = await UserData.findOne({ username: decoded.username })
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
     const gender = user.profile?.gender || 'Other'
     const avatarUrl =
