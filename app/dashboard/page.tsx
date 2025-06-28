@@ -3,9 +3,7 @@
 import React from 'react'
 import SpendingTrendChart from '@/components/dashboard/SpendingTrendChart'
 import Methodgraph from '@/components/dashboard/methodgraph'
-import IncomeVsExpenseChart from '@/components/dashboard/IncomeVsExpenseChart'
-import TopCategoriesChart from '@/components/dashboard/TopCategoriesChart'
-import SavingsProgressChart from '@/components/dashboard/SavingsProgressChart'
+
 
 export default function DashboardPage() {
   return (
@@ -19,9 +17,6 @@ export default function DashboardPage() {
           <Methodgraph /> {/* ✅ keep only this one */}
         </div>
 
-        <IncomeVsExpenseChart />
-        <TopCategoriesChart />
-        <SavingsProgressChart />
       </section>
     </main>
   )
