@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { RotateCcw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import confetti from 'canvas-confetti'
 
 export default function SavingsProgressChart() {
   const [baseSalary, setBaseSalary] = useState(0)
@@ -14,7 +15,7 @@ export default function SavingsProgressChart() {
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
 
-  // 🧮 Currency formatter
+  // Format ₹ numbers
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -22,12 +23,12 @@ export default function SavingsProgressChart() {
       maximumFractionDigits: 0,
     }).format(amount)
 
-  // 🔢 Smooth number animation
+  // Animate stat numbers
   const useAnimatedNumber = (value: number) => {
     const [display, setDisplay] = useState(0)
     useEffect(() => {
       let start = 0
-      const step = Math.ceil(value / 25)
+      const step = Math.ceil(value / 30)
       const interval = setInterval(() => {
         start += step
         if (start >= value) {
@@ -47,7 +48,6 @@ export default function SavingsProgressChart() {
   const animatedExpenses = useAnimatedNumber(expenses)
   const animatedRemaining = useAnimatedNumber(baseSalary + credits - expenses)
 
-  // 📊 Fetch salary, credits, expenses
   const fetchData = async () => {
     const token = localStorage.getItem('token') || ''
     try {
@@ -67,13 +67,25 @@ export default function SavingsProgressChart() {
       const expensesData = await expenseRes.json()
       const creditsData = await creditRes.json()
 
-      const expenseList = Array.isArray(expensesData) ? expensesData : expensesData?.data || []
-      const creditList = Array.isArray(creditsData) ? creditsData : creditsData?.data || []
+      const expenseList = Array.isArray(expensesData)
+        ? expensesData
+        : expensesData?.data || []
 
-      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
+      const creditList = Array.isArray(creditsData)
+        ? creditsData
+        : creditsData?.data || []
+
+      const totalExpense = expenseList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
+
+      const totalCredit = creditList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
+
       const base = salaryData?.data?.salary || 0
-
       const totalFunds = base + totalCredit
       const remaining = Math.max(totalFunds - totalExpense, 0)
       const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
@@ -83,7 +95,7 @@ export default function SavingsProgressChart() {
       setExpenses(totalExpense)
       setProgress(Math.round(percentage))
     } catch (err) {
-      console.error('❌ Failed to fetch data:', err)
+      console.error('Failed to fetch data:', err)
     }
   }
 
@@ -111,12 +123,8 @@ export default function SavingsProgressChart() {
       transition: { duration: 1, ease: 'easeInOut' },
     })
 
-    // 🎉 Trigger confetti if 100% savings
     if (progress === 100) {
-      import('canvas-confetti').then((module) => {
-        const confetti = module.default
-        confetti({ particleCount: 120, spread: 100, origin: { y: 0.6 } })
-      })
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
     }
 
     return () => clearInterval(counter)
@@ -136,11 +144,12 @@ export default function SavingsProgressChart() {
 
   return (
     <motion.div
-      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-xl text-white relative before:absolute before:inset-0 before:rounded-2xl before:blur-2xl before:bg-cyan-400/10 before:opacity-20 before:z-0"
+      id="savings-chart"
+      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-2xl text-white relative before:absolute before:inset-0 before:rounded-2xl before:blur-2xl before:bg-cyan-400/10 before:opacity-20 before:z-0"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      {/* 🔹 Header */}
+      {/* Header */}
       <div className="relative z-10 flex justify-between items-center mb-4">
         <div>
           <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
@@ -156,7 +165,7 @@ export default function SavingsProgressChart() {
         </motion.button>
       </div>
 
-      {/* 🌀 Circular Progress */}
+      {/* Circular Progress */}
       <div className="flex justify-center items-center mt-6 relative z-10">
         <div className="relative w-36 h-36">
           <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
@@ -206,7 +215,7 @@ export default function SavingsProgressChart() {
         </div>
       </div>
 
-      {/* 🏅 Performance Badge */}
+      {/* Performance Badge */}
       <div className="text-center mt-3 text-sm font-semibold">
         {progress >= 75 ? (
           <span className="text-green-400">Excellent Savings 💰</span>
@@ -217,7 +226,7 @@ export default function SavingsProgressChart() {
         )}
       </div>
 
-      {/* 📈 Stats */}
+      {/* Stats */}
       <div className="mt-6 space-y-2 text-sm text-slate-300 px-2 relative z-10">
         <div className="flex justify-between">
           <span>Base Salary</span>
@@ -251,7 +260,7 @@ export default function SavingsProgressChart() {
         </div>
       </div>
 
-      {/* 💡 Tip */}
+      {/* Tip */}
       {progress < 30 && (
         <p className="mt-4 text-xs text-amber-400 text-center italic">
           Tip: Try to save at least 50% of your funds this month!
