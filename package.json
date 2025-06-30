@@ -11,6 +11,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.21",
     "bcryptjs": "^3.0.2",
+"canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.0",
     "clsx": "^2.1.1",
     "decimal.js": "^10.5.0",
