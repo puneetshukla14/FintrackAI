@@ -1,5 +1,5 @@
 {
-  "name": "Fintrack",
+  "name": "pwa",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "@clerk/nextjs": "^6.22.0",
     "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^3.0.2",
-    
+    "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.9",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
