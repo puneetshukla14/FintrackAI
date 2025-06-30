@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
-
+import { items } from '@/lib/items'
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
