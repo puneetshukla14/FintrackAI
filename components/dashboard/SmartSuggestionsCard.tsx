@@ -147,4 +147,3 @@ export default function SmartSuggestionsCard({ remaining }: { remaining: number 
     </motion.div>
   )
 }
-
