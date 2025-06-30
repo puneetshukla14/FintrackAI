@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import SalaryCard from '@/components/dashboard/SalaryCard'
-import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+
 import useAuth from '@/hooks/useAuth'
 
 
@@ -62,11 +62,7 @@ export default function DashboardPage() {
           <SalaryCard />
         </div>
 
-        {/* 👇 AI Suggestions */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
-          <SmartSuggestionsCard remaining={remaining} />
-
-        </div>
+ 
       </section>
     </main>
   )
