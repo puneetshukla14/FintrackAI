@@ -1,67 +1,76 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Sparkles, Volume2, RotateCcw } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 
-export default function SmartSuggestionsCard({ remaining }) {
-  const [suggestion, setSuggestion] = useState<string>('Loading smart suggestions...')
+import React, { useEffect, useState } from 'react'
+import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+
+export default function DashboardPage() {
+  const [userSalary, setUserSalary] = useState(0)
+  const [totalExpenses, setTotalExpenses] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [language, setLanguage] = useState<'en'|'hi'>('en')
-
-  const getSuggestions = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/ai/suggestions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          balance: remaining,
-          username: 'Sir',
-          gender: 'unspecified',
-          language,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Unknown error')
-      setSuggestion(data.answer)
-    } catch (err) {
-      console.error('AI error:', err)
-      setSuggestion('Sorry, I couldn’t load suggestions right now.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [error, setError] = useState(false)
 
   useEffect(() => {
-    getSuggestions()
-  }, [remaining, language])
+    const fetchData = async () => {
+      try {
+        const profileRes = await fetch('/api/user/profile', {
+          method: 'GET',
+          credentials: 'include',
+        })
+
+        if (profileRes.status === 401) {
+          window.location.href = '/sign-in'
+          return
+        }
+
+        const profileData = await profileRes.json()
+        const salary = profileData?.profile?.monthlySalary || 0
+        setUserSalary(salary)
+
+        const expenseRes = await fetch('/api/expenses', {
+          method: 'GET',
+          credentials: 'include',
+        })
+
+        const expenses = await expenseRes.json()
+        const total = Array.isArray(expenses)
+          ? expenses.reduce((sum, item) => sum + (item.amount || 0), 0)
+          : 0
+
+        setTotalExpenses(total)
+      } catch (err) {
+        console.error('❌ Failed to fetch dashboard data:', err)
+        setError(true)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-white bg-black">
+        Loading...
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-red-400 bg-black">
+        Failed to load dashboard.
+      </div>
+    )
+  }
+
+  const remaining = userSalary - totalExpenses
 
   return (
-    <motion.div className="p-4 bg-zinc-900 rounded-lg shadow-lg text-white">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2">
-          <Sparkles size={18} className="text-cyan-400" />
-          <h3 className="font-semibold text-cyan-300">AI Suggestion</h3>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}>
-            {language === 'en' ? 'हिंदी' : 'EN'}
-          </button>
-          <button onClick={getSuggestions}><RotateCcw size={18} /></button>
-        </div>
+    <main className="min-h-screen p-6 bg-black flex justify-center items-center">
+      <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-5 shadow-lg">
+        <SmartSuggestionsCard remaining={remaining} />
       </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={suggestion}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="text-sm leading-relaxed"
-        >
-          {loading ? <em>Thinking…</em> : suggestion}
-        </motion.div>
-      </AnimatePresence>
-    </motion.div>
+    </main>
   )
 }
