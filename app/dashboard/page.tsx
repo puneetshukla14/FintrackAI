@@ -69,19 +69,18 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-    <main className="p-6 space-y-6">
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-        {/* 👇 Salary Card */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
-          <SalaryCard />
-        </div>
+<main className="p-6 space-y-6">
+  <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
+    {/* 👇 Salary Card - Normal width */}
+    <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
+      <SalaryCard />
+    </div>
 
-        {/* 👇 AI Suggestions */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
-          <SmartSuggestionsCard remaining={remaining} />
-
-        </div>
-      </section>
-    </main>
+    {/* 👇 AI Suggestions Card - Wider on desktop */}
+    <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2 h-full">
+      <SmartSuggestionsCard remaining={remaining} />
+    </div>
+  </section>
+</main>
   )
 }
