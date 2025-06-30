@@ -1,11 +1,8 @@
 'use client'
 
 import { motion, useAnimation } from 'framer-motion'
-import { RotateCcw, Download } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import confetti from 'canvas-confetti'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
 
 export default function SavingsProgressChart() {
   const [baseSalary, setBaseSalary] = useState(0)
@@ -17,60 +14,45 @@ export default function SavingsProgressChart() {
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
 
-  // 💰 Currency Format
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount)
-
-  // 🔢 Animated numbers
-  const useAnimatedNumber = (value: number) => {
-    const [display, setDisplay] = useState(0)
-    useEffect(() => {
-      let start = 0
-      const step = Math.ceil(value / 30)
-      const interval = setInterval(() => {
-        start += step
-        if (start >= value) {
-          clearInterval(interval)
-          setDisplay(value)
-        } else {
-          setDisplay(start)
-        }
-      }, 20)
-      return () => clearInterval(interval)
-    }, [value])
-    return display
-  }
-
-  const animatedSalary = useAnimatedNumber(baseSalary)
-  const animatedCredits = useAnimatedNumber(credits)
-  const animatedExpenses = useAnimatedNumber(expenses)
-  const animatedRemaining = useAnimatedNumber(baseSalary + credits - expenses)
-
-  // 🧠 Fetch user data
   const fetchData = async () => {
     const token = localStorage.getItem('token') || ''
+
     try {
       const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/expenses', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/credits', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/user/salary', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/expenses', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/credits', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ])
 
       const salaryData = await salaryRes.json()
       const expensesData = await expenseRes.json()
       const creditsData = await creditRes.json()
 
-      const expenseList = Array.isArray(expensesData) ? expensesData : expensesData?.data || []
-      const creditList = Array.isArray(creditsData) ? creditsData : creditsData?.data || []
+      const expenseList = Array.isArray(expensesData)
+        ? expensesData
+        : expensesData?.data || []
 
-      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
+      const creditList = Array.isArray(creditsData)
+        ? creditsData
+        : creditsData?.data || []
+
+      const totalExpense = expenseList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
+
+      const totalCredit = creditList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
+
       const base = salaryData?.data?.salary || 0
-
       const totalFunds = base + totalCredit
       const remaining = Math.max(totalFunds - totalExpense, 0)
       const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
@@ -84,7 +66,6 @@ export default function SavingsProgressChart() {
     }
   }
 
-  // ⏳ Progress animation
   useEffect(() => {
     fetchData()
   }, [])
@@ -93,6 +74,7 @@ export default function SavingsProgressChart() {
     let start = 0
     const duration = 1000
     const increment = progress / (duration / 20)
+
     const counter = setInterval(() => {
       start += increment
       if (start >= progress) {
@@ -108,10 +90,6 @@ export default function SavingsProgressChart() {
       transition: { duration: 1, ease: 'easeInOut' },
     })
 
-    if (progress === 100) {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
-    }
-
     return () => clearInterval(counter)
   }, [progress])
 
@@ -124,143 +102,124 @@ export default function SavingsProgressChart() {
     iconControls.set({ rotate: 0 })
   }
 
-  const exportToPDF = async () => {
-    const chart = document.getElementById('savings-chart')
-    if (!chart) return
-    const canvas = await html2canvas(chart)
-    const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'px',
-      format: [canvas.width, canvas.height],
-    })
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
-    pdf.save('savings-summary.pdf')
-  }
-
   const totalFunds = baseSalary + credits
   const remaining = totalFunds - expenses
 
   return (
     <motion.div
-      id="savings-chart"
-      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-2xl text-white relative before:absolute before:inset-0 before:rounded-2xl before:blur-2xl before:bg-cyan-400/10 before:opacity-20 before:z-0"
+      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-2xl text-white"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
     >
       {/* Header */}
-      <div className="relative z-10 flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <div>
           <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
           <p className="text-xs text-zinc-400">Real-time savings insights</p>
         </div>
-        <div className="flex gap-2">
-          <motion.button
-            onClick={handleRefresh}
-            animate={iconControls}
-            whileHover={{ scale: 1.1 }}
-            className="text-purple-400 hover:text-purple-300 transition-colors"
-          >
-            <RotateCcw size={20} />
-          </motion.button>
-          <button
-            onClick={exportToPDF}
-            className="text-cyan-400 hover:text-cyan-300 transition-colors"
-          >
-            <Download size={20} />
-          </button>
-        </div>
+
+        <motion.button
+          onClick={handleRefresh}
+          animate={iconControls}
+          whileHover={{ scale: 1.1 }}
+          className="text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          <RotateCcw size={20} />
+        </motion.button>
       </div>
 
       {/* Circular Progress */}
-      <div className="flex justify-center items-center mt-6 relative z-10">
-        <div className="relative w-36 h-36">
-          <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
-          <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
-            <circle cx="72" cy="72" r="60" className="stroke-zinc-800" strokeWidth="10" fill="none" />
-            <motion.circle
-              cx="72"
-              cy="72"
-              r="60"
-              stroke="url(#gradient)"
-              strokeWidth="10"
-              fill="none"
-              strokeDasharray="377"
-              strokeDashoffset="377"
-              strokeLinecap="round"
-              animate={strokeControls}
-              style={{
-                transition: 'stroke-dashoffset 1s ease-in-out',
-                filter: 'drop-shadow(0 0 6px #0ea5e9)',
-              }}
-            />
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="50%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#8b5cf6" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
-            <div className="flex flex-col items-center">
-              <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
-                {displayProgress}%
-              </span>
-              <span className="text-xs text-cyan-400 font-medium opacity-90">
-                <span className="text-base font-bold">₹</span> Saved
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+  
+        <div className="flex justify-center items-center mt-6">
+  <div className="relative w-36 h-36">
+    {/* Background glow */}
+    <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
 
-      {/* Badge */}
-      <div className="text-center mt-3 text-sm font-semibold">
-        {progress >= 75 ? (
-          <span className="text-green-400">Excellent Savings 💰</span>
-        ) : progress >= 50 ? (
-          <span className="text-yellow-400">Good Progress 👍</span>
-        ) : (
-          <span className="text-rose-400">Needs Improvement 🚨</span>
-        )}
-      </div>
+    {/* SVG circle with viewBox for proper centering */}
+    <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
+      <circle
+        cx="72"
+        cy="72"
+        r="60"
+        className="stroke-zinc-800"
+        strokeWidth="10"
+        fill="none"
+      />
+      <motion.circle
+        cx="72"
+        cy="72"
+        r="60"
+        stroke="url(#gradient)"
+        strokeWidth="10"
+        fill="none"
+        strokeDasharray="377"
+        strokeDashoffset="377"
+        strokeLinecap="round"
+        animate={strokeControls}
+        style={{
+          transition: 'stroke-dashoffset 1s ease-in-out',
+          filter: 'drop-shadow(0 0 6px #0ea5e9)',
+        }}
+      />
+      <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="50%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </linearGradient>
+      </defs>
+    </svg>
 
-      {/* Stats */}
-      <div className="mt-6 space-y-2 text-sm text-slate-300 px-2 relative z-10">
+    {/* Centered text container */}
+    <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
+      <div className="flex flex-col items-center">
+        <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
+          {displayProgress}%
+        </span>
+        <span className="text-xs text-cyan-400 mt-[-7] font-medium opacity-90">
+          <span className="text-base font-bold">₹</span> Saved
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      {/* Stats Breakdown */}
+      <div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
         <div className="flex justify-between">
           <span>Base Salary</span>
           <span className="font-medium text-sky-400">
-            {formatCurrency(animatedSalary)}
+            ₹{baseSalary.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Added Money</span>
           <span className="font-medium text-green-400">
-            + {formatCurrency(animatedCredits)}
+            + ₹{credits.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Total Funds</span>
           <span className="font-medium text-white">
-            {formatCurrency(totalFunds)}
+            ₹{totalFunds.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Total Spent</span>
           <span className="font-medium text-rose-400">
-            {formatCurrency(animatedExpenses)}
+            ₹{expenses.toLocaleString()}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Remaining</span>
           <span className="font-medium text-emerald-400">
-            {formatCurrency(animatedRemaining)}
+            ₹{remaining.toLocaleString()}
           </span>
         </div>
       </div>
 
-      {/* Tip */}
+      {/* Saving Tip */}
       {progress < 30 && (
         <p className="mt-4 text-xs text-amber-400 text-center italic">
           Tip: Try to save at least 50% of your funds this month!
