@@ -3,6 +3,7 @@
 import { motion, useAnimation } from 'framer-motion'
 import { RotateCcw } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import confetti from 'canvas-confetti'
 
 export default function SavingsProgressChart() {
   const [baseSalary, setBaseSalary] = useState(0)
@@ -10,37 +11,56 @@ export default function SavingsProgressChart() {
   const [expenses, setExpenses] = useState(0)
   const [progress, setProgress] = useState(0)
   const [displayProgress, setDisplayProgress] = useState(0)
-const [currency, setCurrency] = useState('INR')
-const [conversionRate, setConversionRate] = useState(1)
-
-const conversionRates: Record<string, number> = {
-  INR: 1,
-  USD: 0.012,
-  EUR: 0.011,
-  GBP: 0.0095,
-  JPY: 1.75,
-  AED: 0.044,
-}
-
-const currencySymbols: Record<string, string> = {
-  INR: '₹',
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  JPY: '¥',
-  AED: 'د.إ',
-}
-
 
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
 
+  // Format ₹ numbers
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount)
+
+  // Animate stat numbers
+  const useAnimatedNumber = (value: number) => {
+    const [display, setDisplay] = useState(0)
+    useEffect(() => {
+      let start = 0
+      const step = Math.ceil(value / 30)
+      const interval = setInterval(() => {
+        start += step
+        if (start >= value) {
+          clearInterval(interval)
+          setDisplay(value)
+        } else {
+          setDisplay(start)
+        }
+      }, 20)
+      return () => clearInterval(interval)
+    }, [value])
+    return display
+  }
+
+  const animatedSalary = useAnimatedNumber(baseSalary)
+  const animatedCredits = useAnimatedNumber(credits)
+  const animatedExpenses = useAnimatedNumber(expenses)
+  const animatedRemaining = useAnimatedNumber(baseSalary + credits - expenses)
+
   const fetchData = async () => {
+    const token = localStorage.getItem('token') || ''
     try {
       const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', { credentials: 'include' }),
-        fetch('/api/expenses', { credentials: 'include' }),
-        fetch('/api/credits', { credentials: 'include' }),
+        fetch('/api/user/salary', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/expenses', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/credits', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ])
 
       const salaryData = await salaryRes.json()
@@ -55,10 +75,17 @@ const currencySymbols: Record<string, string> = {
         ? creditsData
         : creditsData?.data || []
 
-      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-      const base = salaryData?.data?.salary || 0
+      const totalExpense = expenseList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
 
+      const totalCredit = creditList.reduce(
+        (sum: number, item: any) => sum + (item.amount || 0),
+        0
+      )
+
+      const base = salaryData?.data?.salary || 0
       const totalFunds = base + totalCredit
       const remaining = Math.max(totalFunds - totalExpense, 0)
       const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
@@ -68,7 +95,7 @@ const currencySymbols: Record<string, string> = {
       setExpenses(totalExpense)
       setProgress(Math.round(percentage))
     } catch (err) {
-      console.error('Savings chart fetch error:', err)
+      console.error('Failed to fetch data:', err)
     }
   }
 
@@ -96,11 +123,18 @@ const currencySymbols: Record<string, string> = {
       transition: { duration: 1, ease: 'easeInOut' },
     })
 
+    if (progress === 100) {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
+    }
+
     return () => clearInterval(counter)
   }, [progress])
 
   const handleRefresh = async () => {
-    iconControls.start({ rotate: 360, transition: { duration: 0.6, ease: 'easeInOut' } })
+    iconControls.start({
+      rotate: 360,
+      transition: { duration: 0.6, ease: 'easeInOut' },
+    })
     await fetchData()
     iconControls.set({ rotate: 0 })
   }
@@ -110,45 +144,29 @@ const currencySymbols: Record<string, string> = {
 
   return (
     <motion.div
-      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-2xl text-white"
+      id="savings-chart"
+      className="w-full bg-gradient-to-br from-zinc-900 to-black p-6 rounded-2xl shadow-2xl text-white relative before:absolute before:inset-0 before:rounded-2xl before:blur-2xl before:bg-cyan-400/10 before:opacity-20 before:z-0"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
     >
       {/* Header */}
-<div className="flex justify-between items-center mb-4">
-  <div>
-    <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
-    <p className="text-xs text-zinc-400">Real-time savings insights</p>
-  </div>
-  <div className="flex items-center gap-3">
-    <select
-      value={currency}
-      onChange={(e) => {
-        setCurrency(e.target.value)
-        setConversionRate(conversionRates[e.target.value])
-      }}
-      className="bg-zinc-800 text-xs text-white border border-zinc-700 rounded-md px-2 py-1 focus:outline-none hover:border-cyan-500 transition"
-    >
-      {Object.keys(conversionRates).map((cur) => (
-        <option key={cur} value={cur}>
-          {currencySymbols[cur]} {cur}
-        </option>
-      ))}
-    </select>
-
-    <motion.button
-      onClick={handleRefresh}
-      animate={iconControls}
-      whileHover={{ scale: 1.1 }}
-      className="text-purple-400 hover:text-purple-300 transition-colors"
-    >
-      <RotateCcw size={20} />
-    </motion.button>
-  </div>
-</div>
+      <div className="relative z-10 flex justify-between items-center mb-4">
+        <div>
+          <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
+          <p className="text-xs text-zinc-400">Real-time savings insights</p>
+        </div>
+        <motion.button
+          onClick={handleRefresh}
+          animate={iconControls}
+          whileHover={{ scale: 1.1 }}
+          className="text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          <RotateCcw size={20} />
+        </motion.button>
+      </div>
 
       {/* Circular Progress */}
-      <div className="flex justify-center items-center mt-6">
+      <div className="flex justify-center items-center mt-6 relative z-10">
         <div className="relative w-36 h-36">
           <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
           <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
@@ -189,7 +207,7 @@ const currencySymbols: Record<string, string> = {
               <span className="text-white text-[1.8rem] font-mono font-extrabold leading-tight">
                 {displayProgress}%
               </span>
-              <span className="text-xs text-cyan-400 font-medium opacity-90 -mt-1">
+              <span className="text-xs text-cyan-400 font-medium opacity-90">
                 <span className="text-base font-bold">₹</span> Saved
               </span>
             </div>
@@ -197,44 +215,52 @@ const currencySymbols: Record<string, string> = {
         </div>
       </div>
 
+      {/* Performance Badge */}
+      <div className="text-center mt-3 text-sm font-semibold">
+        {progress >= 75 ? (
+          <span className="text-green-400">Excellent Savings 💰</span>
+        ) : progress >= 50 ? (
+          <span className="text-yellow-400">Good Progress 👍</span>
+        ) : (
+          <span className="text-rose-400">Needs Improvement 🚨</span>
+        )}
+      </div>
 
-      
-{/* Stats */}
-<div className="mt-6 space-y-2 text-sm text-slate-300 px-2">
-  <div className="flex justify-between">
-    <span>Base Salary</span>
-    <span className="font-medium text-sky-400">
-      {currencySymbols[currency]}{Math.round(baseSalary * conversionRate).toLocaleString()}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span>Added Money</span>
-    <span className="font-medium text-green-400">
-      + {currencySymbols[currency]}{Math.round(credits * conversionRate).toLocaleString()}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span>Total Funds</span>
-    <span className="font-medium text-white">
-      {currencySymbols[currency]}{Math.round(totalFunds * conversionRate).toLocaleString()}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span>Total Spent</span>
-    <span className="font-medium text-rose-400">
-      {currencySymbols[currency]}{Math.round(expenses * conversionRate).toLocaleString()}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span>Remaining</span>
-    <span className="font-medium text-emerald-400">
-      {currencySymbols[currency]}{Math.round(remaining * conversionRate).toLocaleString()}
-    </span>
-  </div>
-</div>
+      {/* Stats */}
+      <div className="mt-6 space-y-2 text-sm text-slate-300 px-2 relative z-10">
+        <div className="flex justify-between">
+          <span>Base Salary</span>
+          <span className="font-medium text-sky-400">
+            {formatCurrency(animatedSalary)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span>Added Money</span>
+          <span className="font-medium text-green-400">
+            + {formatCurrency(animatedCredits)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span>Total Funds</span>
+          <span className="font-medium text-white">
+            {formatCurrency(totalFunds)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span>Total Spent</span>
+          <span className="font-medium text-rose-400">
+            {formatCurrency(animatedExpenses)}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span>Remaining</span>
+          <span className="font-medium text-emerald-400">
+            {formatCurrency(animatedRemaining)}
+          </span>
+        </div>
+      </div>
 
-
-
+      {/* Tip */}
       {progress < 30 && (
         <p className="mt-4 text-xs text-amber-400 text-center italic">
           Tip: Try to save at least 50% of your funds this month!
