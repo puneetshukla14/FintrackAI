@@ -1,3 +1,4 @@
+// components/dashboard/SmartSuggestionsCard.tsx
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -5,42 +6,41 @@ import React, { useEffect, useState } from 'react'
 type Props = {
   remaining: number
   username: string
+  items: any // You can replace 'any' with a specific type like Item[] if needed
 }
 
-export default function SmartSuggestionsCard({ remaining, username }: Props) {
-  const [suggestion, setSuggestion] = useState('Loading suggestions...')
+export default function SmartSuggestionsCard({ remaining, username, items }: Props) {
+  const [suggestions, setSuggestions] = useState<string>('Loading suggestions...')
 
   useEffect(() => {
-    const fetchSuggestions = async () => {
+    const getSuggestions = async () => {
       try {
         const res = await fetch('/api/ai/suggestions', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             balance: remaining,
             username,
-            gender: 'Other',
+            gender: 'unspecified', // optional: fetch from profile
             language: 'en',
           }),
         })
 
         const data = await res.json()
-        setSuggestion(data?.answer || 'Could not generate suggestions.')
+        setSuggestions(data.answer || 'No suggestions found.')
       } catch (err) {
-        console.error('Failed to fetch AI suggestions:', err)
-        setSuggestion('Error loading suggestions.')
+        console.error('AI Suggestion Error:', err)
+        setSuggestions('Something went wrong while fetching suggestions.')
       }
     }
 
-    fetchSuggestions()
+    getSuggestions()
   }, [remaining, username])
 
   return (
     <div className="text-white">
-      <h2 className="text-xl font-semibold mb-3">💡 Smart Suggestions</h2>
-      <p className="text-sm leading-relaxed whitespace-pre-line">{suggestion}</p>
+      <h2 className="text-xl font-semibold mb-3">🤖 FinBot Suggestions</h2>
+      <p className="text-gray-300 whitespace-pre-line">{suggestions}</p>
     </div>
   )
 }
