@@ -226,54 +226,6 @@ export default function SavingsProgressChart() {
         )}
       </div>
 
-
-
-
-
-{/* 🎖️ Milestone Badge */}
-{progress >= 25 && (
-  <motion.div
-    key={
-      progress >= 100
-        ? 'platinum'
-        : progress >= 75
-        ? 'gold'
-        : progress >= 50
-        ? 'silver'
-        : 'bronze'
-    }
-    initial={{ scale: 0.6, opacity: 0 }}
-    animate={{ scale: 1, opacity: 1 }}
-    transition={{ type: 'spring', stiffness: 260, damping: 15 }}
-    className="text-center mt-5 z-20"
-  >
-    <div
-      className={`relative inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold shadow-md
-        ${
-          progress >= 100
-            ? 'bg-gradient-to-r from-fuchsia-500 to-purple-700 text-white animate-pulse'
-            : progress >= 75
-            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black animate-pulse'
-            : progress >= 50
-            ? 'bg-gradient-to-r from-sky-400 to-blue-600 text-white'
-            : 'bg-gradient-to-r from-amber-300 to-orange-400 text-black'
-        }
-      `}
-    >
-      {progress >= 100
-        ? '💎 Platinum Saver'
-        : progress >= 75
-        ? '🥇 Gold Saver'
-        : progress >= 50
-        ? '🥈 Silver Saver'
-        : '🥉 Bronze Saver'}
-    </div>
-  </motion.div>
-)}
-
-
-
-
       {/* Stats */}
       <div className="mt-6 space-y-2 text-sm text-slate-300 px-2 relative z-10">
         <div className="flex justify-between">
