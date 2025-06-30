@@ -22,10 +22,10 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
+        credentials: 'include' // ✅ Critical for cookie to work on Vercel
       })
 
-      // This triggers if server responds with redirect
       if (res.redirected) {
         window.location.href = res.url
         return
@@ -46,6 +46,7 @@ export default function SignUpPage() {
         {error && <p className="text-red-400 text-sm text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
             <input
@@ -58,6 +59,7 @@ export default function SignUpPage() {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">
@@ -70,7 +72,11 @@ export default function SignUpPage() {
                 className="w-full px-4 py-2.5 pr-12 bg-zinc-800 text-white border border-zinc-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
                 required
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3"
+              >
                 {showPassword ? <EyeOff size={20} stroke="white" /> : <Eye size={20} stroke="white" />}
               </button>
             </div>
