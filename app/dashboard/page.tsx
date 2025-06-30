@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import SalaryCard from '@/components/dashboard/SalaryCard'
+
+import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 
 import useAuth from '@/hooks/useAuth'
 
@@ -57,12 +58,13 @@ export default function DashboardPage() {
   return (
     <main className="p-6 space-y-6">
       <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-        {/* 👇 Salary Card */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
-          <SalaryCard />
-        </div>
 
- 
+
+         {/* 👇 AI Suggestions */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SmartSuggestionsCard remaining={remaining} />
+
+        </div>
       </section>
     </main>
   )
