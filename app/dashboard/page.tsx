@@ -8,6 +8,7 @@ export default function DashboardPage() {
   const [totalExpenses, setTotalExpenses] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [username, setUsername] = useState('Sir')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +25,10 @@ export default function DashboardPage() {
 
         const profileData = await profileRes.json()
         const salary = profileData?.profile?.monthlySalary || 0
+        const name = profileData?.profile?.fullName || 'Sir'
+
         setUserSalary(salary)
+        setUsername(name)
 
         const expenseRes = await fetch('/api/expenses', {
           method: 'GET',
@@ -38,7 +42,7 @@ export default function DashboardPage() {
 
         setTotalExpenses(total)
       } catch (err) {
-        console.error('❌ Failed to fetch dashboard data:', err)
+        console.error('❌ Failed to fetch data:', err)
         setError(true)
       } finally {
         setLoading(false)
@@ -67,10 +71,10 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-    <main className="min-h-screen p-6 bg-black flex justify-center items-center">
-      <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-5 shadow-lg">
-        <SmartSuggestionsCard remaining={remaining} />
-      </div>
+    <main className="p-6 space-y-6 bg-black min-h-screen">
+      <section className="w-full max-w-xl mx-auto bg-zinc-900 rounded-2xl p-5 shadow-lg">
+        <SmartSuggestionsCard remaining={remaining} username={username} />
+      </section>
     </main>
   )
 }
