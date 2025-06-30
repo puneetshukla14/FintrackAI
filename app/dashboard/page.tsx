@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
@@ -67,10 +69,19 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-    <main className="min-h-screen p-6 bg-black flex justify-center items-center">
-      <div className="w-full max-w-md bg-zinc-900 rounded-2xl p-5 shadow-lg">
-        <SmartSuggestionsCard remaining={remaining} />
-      </div>
+    <main className="p-6 space-y-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+        {/* 👇 Salary Card */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SalaryCard />
+        </div>
+
+        {/* 👇 AI Suggestions */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SmartSuggestionsCard remaining={remaining} />
+
+        </div>
+      </section>
     </main>
   )
 }
