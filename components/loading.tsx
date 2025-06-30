@@ -25,13 +25,14 @@ const Loading = () => {
         justifyContent: 'center',
         background: 'black',
         overflow: 'hidden',
+        padding: '0 5vw', // ✅ Padding to prevent overflow
         zIndex: 9999,
       }}
     >
       <h1
         style={{
           fontFamily: "'Oswald', sans-serif",
-          fontSize: '11vmin',
+          fontSize: '9vw', // ✅ Responsive font
           fontWeight: 600,
           letterSpacing: '0.1em',
           textAlign: 'center',
@@ -39,8 +40,9 @@ const Loading = () => {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           animation: 'netflix_style 4.5s ease-out',
-          whiteSpace: 'nowrap',
-          zIndex: 1,
+          whiteSpace: 'normal', // ✅ allow wrapping on small screens
+          wordBreak: 'break-word', // ✅ prevents cut-off
+          lineHeight: '1.1',
         }}
       >
         FINTRACK V.7.0.25
