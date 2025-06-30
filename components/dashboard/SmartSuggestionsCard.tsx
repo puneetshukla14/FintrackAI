@@ -39,9 +39,15 @@ export default function SmartSuggestionsCard({
     }
   }
 
+  // Fetch suggestions on props change
   useEffect(() => {
     if (username) getSuggestions()
   }, [remaining, items, username])
+
+  // Auto-speak when loaded
+  useEffect(() => {
+    if (!loading && suggestion) speak()
+  }, [loading, suggestion])
 
   const speak = () => {
     if (!suggestion) return
