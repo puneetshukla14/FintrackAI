@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -7,35 +6,20 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 type Item = { name: string; price: number }
 
+type SmartSuggestionsCardProps = {
+  remaining: number
+  items: Item[]
+  username: string
+}
+
 export default function SmartSuggestionsCard({
   remaining,
   items,
-}: {
-  remaining: number
-  items: Item[]
-}) {
+  username,
+}: SmartSuggestionsCardProps) {
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(true)
-  const [username, setUsername] = useState<string>('Sir')
-
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const res = await fetch('/api/user/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        const name = data?.profile?.name || 'Sir'
-        setUsername(name)
-      } catch {
-        setUsername('Sir')
-      }
-    }
-
-    fetchUserName()
-  }, [])
 
   const getSuggestions = async () => {
     setLoading(true)
@@ -45,10 +29,11 @@ export default function SmartSuggestionsCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ balance: remaining, items, username }),
       })
+
       const data = await res.json()
       setSuggestion(data.answer)
     } catch (err) {
-      setSuggestion(`${username}, FinBot couldn’t generate suggestions right now.`)
+      setSuggestion(`${username || 'Sir'}, FinBot couldn’t generate suggestions right now.`)
     } finally {
       setLoading(false)
     }
