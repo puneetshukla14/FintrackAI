@@ -12,3 +12,12 @@ body {
   color: white;
   overflow: hidden;
 }
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(113, 113, 122, 0.5); /* zinc-600 */
+  border-radius: 9999px;
+}
