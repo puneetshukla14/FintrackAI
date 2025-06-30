@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
 
     const token = signToken({ userId: user._id, username })
 
-    const response = NextResponse.redirect(new URL('/setup-profile', req.url))
+    const response = NextResponse.json({ redirectTo: '/setup-profile' }, { status: 200 })
+
     response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
