@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import SalaryCard from '@/components/dashboard/SalaryCard'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 
 export default function DashboardPage() {
@@ -72,9 +73,17 @@ export default function DashboardPage() {
 
   return (
     <main className="p-6 space-y-6 bg-black min-h-screen">
-      <section className="w-full max-w-xl mx-auto bg-zinc-900 rounded-2xl p-5 shadow-lg">
-        <SmartSuggestionsCard remaining={remaining} username={username} />
-      </section>
+      <div className="w-full max-w-xl mx-auto space-y-6">
+        {/* ✅ Salary Card */}
+        <div className="bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SalaryCard />
+        </div>
+
+        {/* ✅ AI Suggestions Card */}
+        <div className="bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SmartSuggestionsCard remaining={remaining} username={username} />
+        </div>
+      </div>
     </main>
   )
 }
