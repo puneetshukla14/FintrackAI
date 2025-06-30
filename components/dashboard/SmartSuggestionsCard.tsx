@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Props = {
   remaining: number
@@ -15,22 +15,20 @@ export default function SmartSuggestionsCard({ remaining, username }: Props) {
       try {
         const res = await fetch('/api/ai/suggestions', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             balance: remaining,
             username,
             gender: 'Other',
-            language: 'en',
-          }),
+            language: 'en'
+          })
         })
 
         const data = await res.json()
         setSuggestion(data?.answer || 'Could not generate suggestions.')
-      } catch (error) {
-        console.error('AI Suggestion Error:', error)
-        setSuggestion('Error loading suggestions.')
+      } catch (err) {
+        console.error('AI Suggestion Error:', err)
+        setSuggestion('Error generating suggestions.')
       }
     }
 
@@ -40,7 +38,7 @@ export default function SmartSuggestionsCard({ remaining, username }: Props) {
   return (
     <div className="text-white">
       <h2 className="text-xl font-semibold mb-3">💡 Smart Suggestions</h2>
-      <p className="text-sm leading-relaxed whitespace-pre-line">{suggestion}</p>
+      <p className="text-sm whitespace-pre-line">{suggestion}</p>
     </div>
   )
 }
