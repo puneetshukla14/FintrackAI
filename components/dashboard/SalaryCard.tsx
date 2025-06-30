@@ -1,9 +1,11 @@
 'use client'
 
 import { motion, useAnimation } from 'framer-motion'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, Download } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import confetti from 'canvas-confetti'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 export default function SavingsProgressChart() {
   const [baseSalary, setBaseSalary] = useState(0)
@@ -15,7 +17,7 @@ export default function SavingsProgressChart() {
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
 
-  // Format ₹ numbers
+  // 💰 Currency Format
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -23,7 +25,7 @@ export default function SavingsProgressChart() {
       maximumFractionDigits: 0,
     }).format(amount)
 
-  // Animate stat numbers
+  // 🔢 Animated numbers
   const useAnimatedNumber = (value: number) => {
     const [display, setDisplay] = useState(0)
     useEffect(() => {
@@ -48,44 +50,27 @@ export default function SavingsProgressChart() {
   const animatedExpenses = useAnimatedNumber(expenses)
   const animatedRemaining = useAnimatedNumber(baseSalary + credits - expenses)
 
+  // 🧠 Fetch user data
   const fetchData = async () => {
     const token = localStorage.getItem('token') || ''
     try {
       const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/expenses', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/credits', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        fetch('/api/user/salary', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/expenses', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/credits', { headers: { Authorization: `Bearer ${token}` } }),
       ])
 
       const salaryData = await salaryRes.json()
       const expensesData = await expenseRes.json()
       const creditsData = await creditRes.json()
 
-      const expenseList = Array.isArray(expensesData)
-        ? expensesData
-        : expensesData?.data || []
+      const expenseList = Array.isArray(expensesData) ? expensesData : expensesData?.data || []
+      const creditList = Array.isArray(creditsData) ? creditsData : creditsData?.data || []
 
-      const creditList = Array.isArray(creditsData)
-        ? creditsData
-        : creditsData?.data || []
-
-      const totalExpense = expenseList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-
-      const totalCredit = creditList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-
+      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
+      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
       const base = salaryData?.data?.salary || 0
+
       const totalFunds = base + totalCredit
       const remaining = Math.max(totalFunds - totalExpense, 0)
       const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
@@ -99,6 +84,7 @@ export default function SavingsProgressChart() {
     }
   }
 
+  // ⏳ Progress animation
   useEffect(() => {
     fetchData()
   }, [])
@@ -107,7 +93,6 @@ export default function SavingsProgressChart() {
     let start = 0
     const duration = 1000
     const increment = progress / (duration / 20)
-
     const counter = setInterval(() => {
       start += increment
       if (start >= progress) {
@@ -139,6 +124,20 @@ export default function SavingsProgressChart() {
     iconControls.set({ rotate: 0 })
   }
 
+  const exportToPDF = async () => {
+    const chart = document.getElementById('savings-chart')
+    if (!chart) return
+    const canvas = await html2canvas(chart)
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px',
+      format: [canvas.width, canvas.height],
+    })
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
+    pdf.save('savings-summary.pdf')
+  }
+
   const totalFunds = baseSalary + credits
   const remaining = totalFunds - expenses
 
@@ -155,14 +154,22 @@ export default function SavingsProgressChart() {
           <h3 className="text-lg font-bold text-cyan-400">Savings Overview</h3>
           <p className="text-xs text-zinc-400">Real-time savings insights</p>
         </div>
-        <motion.button
-          onClick={handleRefresh}
-          animate={iconControls}
-          whileHover={{ scale: 1.1 }}
-          className="text-purple-400 hover:text-purple-300 transition-colors"
-        >
-          <RotateCcw size={20} />
-        </motion.button>
+        <div className="flex gap-2">
+          <motion.button
+            onClick={handleRefresh}
+            animate={iconControls}
+            whileHover={{ scale: 1.1 }}
+            className="text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            <RotateCcw size={20} />
+          </motion.button>
+          <button
+            onClick={exportToPDF}
+            className="text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            <Download size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Circular Progress */}
@@ -170,14 +177,7 @@ export default function SavingsProgressChart() {
         <div className="relative w-36 h-36">
           <div className="absolute inset-0 rounded-full bg-black/40 blur-2xl z-0" />
           <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
-            <circle
-              cx="72"
-              cy="72"
-              r="60"
-              className="stroke-zinc-800"
-              strokeWidth="10"
-              fill="none"
-            />
+            <circle cx="72" cy="72" r="60" className="stroke-zinc-800" strokeWidth="10" fill="none" />
             <motion.circle
               cx="72"
               cy="72"
@@ -215,7 +215,7 @@ export default function SavingsProgressChart() {
         </div>
       </div>
 
-      {/* Performance Badge */}
+      {/* Badge */}
       <div className="text-center mt-3 text-sm font-semibold">
         {progress >= 75 ? (
           <span className="text-green-400">Excellent Savings 💰</span>
@@ -225,6 +225,54 @@ export default function SavingsProgressChart() {
           <span className="text-rose-400">Needs Improvement 🚨</span>
         )}
       </div>
+
+
+
+
+
+{/* 🎖️ Milestone Badge */}
+{progress >= 25 && (
+  <motion.div
+    key={
+      progress >= 100
+        ? 'platinum'
+        : progress >= 75
+        ? 'gold'
+        : progress >= 50
+        ? 'silver'
+        : 'bronze'
+    }
+    initial={{ scale: 0.6, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    transition={{ type: 'spring', stiffness: 260, damping: 15 }}
+    className="text-center mt-5 z-20"
+  >
+    <div
+      className={`relative inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm font-bold shadow-md
+        ${
+          progress >= 100
+            ? 'bg-gradient-to-r from-fuchsia-500 to-purple-700 text-white animate-pulse'
+            : progress >= 75
+            ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-black animate-pulse'
+            : progress >= 50
+            ? 'bg-gradient-to-r from-sky-400 to-blue-600 text-white'
+            : 'bg-gradient-to-r from-amber-300 to-orange-400 text-black'
+        }
+      `}
+    >
+      {progress >= 100
+        ? '💎 Platinum Saver'
+        : progress >= 75
+        ? '🥇 Gold Saver'
+        : progress >= 50
+        ? '🥈 Silver Saver'
+        : '🥉 Bronze Saver'}
+    </div>
+  </motion.div>
+)}
+
+
+
 
       {/* Stats */}
       <div className="mt-6 space-y-2 text-sm text-slate-300 px-2 relative z-10">
