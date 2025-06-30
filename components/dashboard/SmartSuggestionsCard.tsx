@@ -21,18 +21,13 @@ export default function SmartSuggestionsCard({ remaining, username }: Props) {
           body: JSON.stringify({
             balance: remaining,
             username,
-            gender: 'Other', // Optional: Replace with actual value if needed
-            language: 'en',   // Change to 'hi' if you want Hindi suggestions
+            gender: 'Other',
+            language: 'en',
           }),
         })
 
         const data = await res.json()
-
-        if (data?.answer) {
-          setSuggestion(data.answer)
-        } else {
-          setSuggestion('Could not generate suggestions at the moment.')
-        }
+        setSuggestion(data?.answer || 'Could not generate suggestions.')
       } catch (error) {
         console.error('AI Suggestion Error:', error)
         setSuggestion('Error loading suggestions.')
