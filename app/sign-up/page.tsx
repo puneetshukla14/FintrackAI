@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
 
@@ -23,16 +22,20 @@ export default function SignUpPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
-        credentials: 'include' // ✅ Critical for cookie to work on Vercel
+        credentials: 'include' // ✅ critical for cookies on Vercel
       })
 
-      if (res.redirected) {
-        window.location.href = res.url
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data?.error || 'Signup failed')
         return
       }
 
-      const data = await res.json()
-      if (!res.ok) setError(data?.error || 'Signup failed')
+      // ✅ Redirect manually after token is set
+      if (data?.redirectTo) {
+        window.location.href = data.redirectTo
+      }
     } catch (err) {
       console.error('Signup Error:', err)
       setError('Something went wrong. Please try again.')
@@ -46,7 +49,6 @@ export default function SignUpPage() {
         {error && <p className="text-red-400 text-sm text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Username</label>
             <input
@@ -59,7 +61,6 @@ export default function SignUpPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
             <div className="relative">
