@@ -11,11 +11,7 @@ import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { PlusCircle } from 'lucide-react'
 
-
-
-
 const links = [
-  
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/expenses', label: ' Add Expenses', icon: CreditCard },
   { href: '/myexpenses', label: 'My Expenses', icon: Wallet },
@@ -25,10 +21,8 @@ const links = [
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/admin', label: 'Admin', icon: Lock },
   { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
-  { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true } // ✅ Added here
+  { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
 ]
-
-
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -42,20 +36,13 @@ export default function Sidebar() {
   useEffect(() => {
     async function fetchUserProfile() {
       try {
-        const res = await fetch('/api/user/profile', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        })
-
+        const res = await fetch('/api/user/profile')
         const data = await res.json()
-
         if (res.status === 404 || data.error === 'User not found') {
           window.location.href = '/sign-up'
           return
         }
-
         if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
-
         setUserName(data?.profile?.fullName || 'Guest')
         setGender(data?.profile?.gender || '')
       } catch (err) {
@@ -65,15 +52,10 @@ export default function Sidebar() {
         setLoading(false)
       }
     }
-
     fetchUserProfile()
   }, [])
 
-  const getAvatarSrc = () => {
-    if (gender === 'Male') return '/avatars/male.png'
-    if (gender === 'Female') return '/avatars/female.png'
-    return ''
-  }
+  const getAvatarSrc = () => gender === 'Male' ? '/avatars/male.png' : gender === 'Female' ? '/avatars/female.png' : ''
 
   useEffect(() => {
     const updateSize = () => setIsMobile(window.innerWidth < 768)
@@ -83,19 +65,11 @@ export default function Sidebar() {
   }, [])
 
   useEffect(() => {
-    if (isMobile) {
-      document.body.style.overflow = sidebarOpen ? 'hidden' : 'auto'
-    }
+    document.body.style.overflow = isMobile && sidebarOpen ? 'hidden' : 'auto'
   }, [isMobile, sidebarOpen])
 
-  useEffect(() => {
-    const saved = localStorage.getItem('devMode')
-    setDevMode(saved === 'true')
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('devMode', devMode.toString())
-  }, [devMode])
+  useEffect(() => setDevMode(localStorage.getItem('devMode') === 'true'), [])
+  useEffect(() => localStorage.setItem('devMode', devMode.toString()), [devMode])
 
   const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/'
@@ -107,7 +81,7 @@ export default function Sidebar() {
     <>
       {isMobile && !sidebarOpen && (
         <button
-          className="fixed top-4 left-4 z-50 bg-zinc-900/90 p-3 rounded-md border border-zinc-700 text-white"
+          className="fixed top-4 left-4 z-50 backdrop-blur-md p-3 rounded-lg border border-white/10 bg-white/10 text-white shadow-md"
           onClick={() => setSidebarOpen(true)}
         >
           <Menu size={20} />
@@ -116,7 +90,7 @@ export default function Sidebar() {
 
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -126,130 +100,90 @@ export default function Sidebar() {
         animate={{ x: sidebarOpen || !isMobile ? 0 : -300 }}
         transition={{ type: 'spring', stiffness: 120, damping: 20 }}
         className={clsx(
-          'fixed top-0 left-0 z-50 h-screen w-64 flex flex-col justify-between',
-          'bg-zinc-950/90 backdrop-blur-md border-r border-zinc-800',
+          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
+          'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
           'md:block'
         )}
       >
-        <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-500 to-cyan-500" />
+        <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
 
-{/* Header */}
-<div className="flex justify-center items-center px-0 py-3 border-b border-zinc-800">
-  <Link href="/dashboard">
-    <h1 className="text-[26px] font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent transition-transform duration-300 hover:scale-110">
-      Fintrack<span className="text-white font-light"> Pro</span>
-    </h1>
-  </Link>
-
-  {isMobile && (
-    <button
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
-      onClick={() => setSidebarOpen(false)}
-    >
-      <X size={24} />
-    </button>
-  )}
-</div>
-
-
-
-
-
-
-        
-
-        {/* Links */}
-        <div className="flex-1 overflow-y-auto px-3 py-3">
-          <div className="space-y-1">
-
-            
-{links.map(({ href, label, icon: Icon, isAction }) => (
-  isAction ? (
-    <button
-      key={href}
-      onClick={() => {
-        if (isMobile) setSidebarOpen(false)
-        window.location.href = href
-      }}
-      className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-md text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200"
-    >
-      <Icon size={20} className="group-hover:scale-110 transition-transform" />
-      <span className="text-sm font-semibold">{label}</span>
-    </button>
-  ) : (
-    <Link
-      key={href}
-      href={href}
-      className={clsx(
-        'group flex items-center gap-3 px-4 py-2.5 rounded-md transition-all duration-200',
-        pathname === href
-          ? 'bg-zinc-800 text-white font-semibold'
-          : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
-      )}
-      onClick={() => isMobile && setSidebarOpen(false)}
-    >
-      <Icon size={20} className="group-hover:scale-105 transition-transform" />
-      <span className="text-sm">{label}</span>
-    </Link>
-  )
-))}
-
-          </div>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+          <h1 className="text-xl font-bold tracking-wide text-white/90">ExpenseX Pro</h1>
+          {isMobile && (
+            <button className="text-white/60 hover:text-white" onClick={() => setSidebarOpen(false)}>
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-        {/* Footer */}
-        <div
-          className={clsx(
-            'px-3 pb-4 border-t border-zinc-800',
-            'md:absolute md:bottom-0 md:left-0 md:right-0 md:pb-5 md:bg-zinc-950/90'
-          )}
-        >
-          {/* User Info */}
-          <div className="flex items-center gap-3 px-4 py-3 mb-1 rounded-md hover:bg-zinc-800 transition-all duration-200 group cursor-pointer">
-            <div className="w-9 h-9 rounded-full overflow-hidden bg-zinc-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+          {links.map(({ href, label, icon: Icon, isAction }, i) => (
+            <motion.div
+              key={href}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: isMobile ? i * 0.05 : 0 }}
+            >
+              {isAction ? (
+                <button
+                  onClick={() => {
+                    if (isMobile) setSidebarOpen(false)
+                    window.location.href = href
+                  }}
+                  className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
+                >
+                  <Icon size={20} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-sm font-medium tracking-wide">{label}</span>
+                </button>
+              ) : (
+                <Link
+                  href={href}
+                  onClick={() => isMobile && setSidebarOpen(false)}
+                  className={clsx(
+                    'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
+                    pathname === href ?
+                      'bg-white/10 text-white font-semibold backdrop-blur-sm' :
+                      'text-white/70 hover:text-white hover:bg-white/10'
+                  )}
+                >
+                  <Icon size={20} className="group-hover:scale-105 transition-transform" />
+                  <span className="text-sm font-medium tracking-wide">{label}</span>
+                </Link>
+              )}
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="px-5 pt-3 pb-6 border-t border-white/10">
+          <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group cursor-pointer">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
               {getAvatarSrc() ? (
-                <img
-                  src={getAvatarSrc()}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
               ) : (
                 <User className="text-white w-5 h-5" />
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-medium text-white group-hover:text-blue-400">
+              <span className="text-sm font-medium text-white group-hover:text-blue-300">
                 {loading ? 'Loading...' : userName || 'Guest'}
               </span>
-              <span className="text-xs text-zinc-400 group-hover:text-zinc-200">View Profile</span>
+              <span className="text-xs text-white/60">View Profile</span>
             </div>
           </div>
 
-          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="mt-3 flex items-center gap-2 w-full px-4 py-2 rounded-md text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200 text-left"
+            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
           >
             <LogOut size={16} />
-            <span className="text-sm">Logout</span>
+            <span className="text-sm tracking-wide">Logout</span>
           </button>
 
-   
-{/* Version */}
-<div className="mt-3 text-xs text-zinc-500 px-2 flex justify-between items-center">
-  <span>V7.25 • Fintrack Premium</span>
-  <a
-    href="https://puneetshuklaprofile.netlify.app/" // 🧭 Change to your actual domain if needed
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-[10px] text-blue-600 border border-blue-600 rounded-full px-2 py-[2px] hover:bg-blue-600 hover:text-white transition-all duration-200"
-  >
-    Puneet Shukla
-  </a>
-</div>
+          <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
+            <span>v1.0 • ExpenseX Pro</span>
+            <span className="text-[10px] text-blue-400">Puneet Shukla Tech</span>
+          </div>
 
-
-          {/* Dev Toggle (Mobile Only) */}
           {isMobile && (
             <div className="mt-4 px-2">
               <div className="px-3 py-2 bg-white/10 border border-white/20 rounded-full flex items-center justify-between">
