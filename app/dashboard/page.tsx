@@ -2,18 +2,20 @@
 
 import React, { useEffect, useState } from 'react'
 import SalaryCard from '@/components/dashboard/SalaryCard'
-
+import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+import { items } from '@/lib/items'
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
   const [totalExpenses, setTotalExpenses] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [username, setUsername] = useState('Sir')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ No Authorization header — cookies are used
+        // ✅ Use secure cookies with credentials
         const profileRes = await fetch('/api/user/profile', {
           method: 'GET',
           credentials: 'include',
@@ -26,7 +28,9 @@ export default function DashboardPage() {
 
         const profileData = await profileRes.json()
         const salary = profileData?.profile?.monthlySalary || 0
+        const name = profileData?.profile?.name || 'Sir'
         setUserSalary(salary)
+        setUsername(name)
 
         const expenseRes = await fetch('/api/expenses', {
           method: 'GET',
@@ -39,8 +43,8 @@ export default function DashboardPage() {
           : 0
 
         setTotalExpenses(total)
-      } catch (error) {
-        console.error('Failed to fetch data:', error)
+      } catch (err) {
+        console.error('❌ Failed to fetch data:', err)
         setError(true)
       } finally {
         setLoading(false)
@@ -66,15 +70,20 @@ export default function DashboardPage() {
     )
   }
 
+  const remaining = userSalary - totalExpenses
+
   return (
     <main className="p-6 space-y-6">
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div className="w-full aspect-square bg-zinc-900 rounded-2xl p-5 shadow-lg flex flex-col">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
+        {/* 💰 Salary Card */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
           <SalaryCard />
         </div>
 
-
-    
+        {/* 🧠 AI Suggestions */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
+          <SmartSuggestionsCard remaining={remaining} items={items} username={username} />
+        </div>
       </section>
     </main>
   )
