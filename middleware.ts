@@ -1,10 +1,9 @@
-// middleware.ts
 import { NextRequest, NextResponse } from 'next/server'
 
 export function middleware(req: NextRequest) {
   const token =
     req.cookies.get('token')?.value ||
-    req.headers.get('authorization')?.replace('Bearer ', '')
+    req.headers.get('cookie')?.match(/token=([^;]+)/)?.[1] || null
 
   const isProtectedRoute = [
     '/dashboard',
@@ -14,7 +13,7 @@ export function middleware(req: NextRequest) {
     '/ai-assistant',
     '/reports',
     '/settings',
-    '/admin'
+    '/admin',
   ].some((route) => req.nextUrl.pathname.startsWith(route))
 
   if (isProtectedRoute && !token) {
@@ -33,6 +32,6 @@ export const config = {
     '/ai-assistant/:path*',
     '/reports/:path*',
     '/settings/:path*',
-    '/admin/:path*'
-  ]
+    '/admin/:path*',
+  ],
 }
