@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
-import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+import SalaryCard from '@/components/dashboard/SalaryCard'
 
 
 export default function DashboardPage() {
