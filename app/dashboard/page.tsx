@@ -15,7 +15,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ Use secure cookies with credentials
+        // ✅ Secure profile fetch with cookies
         const profileRes = await fetch('/api/user/profile', {
           method: 'GET',
           credentials: 'include',
@@ -29,9 +29,11 @@ export default function DashboardPage() {
         const profileData = await profileRes.json()
         const salary = profileData?.profile?.monthlySalary || 0
         const name = profileData?.profile?.name || 'Sir'
+
         setUserSalary(salary)
         setUsername(name)
 
+        // ✅ Fetch expenses
         const expenseRes = await fetch('/api/expenses', {
           method: 'GET',
           credentials: 'include',
@@ -80,7 +82,7 @@ export default function DashboardPage() {
           <SalaryCard />
         </div>
 
-        {/* 🧠 AI Suggestions */}
+        {/* 🤖 Smart Suggestions */}
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg">
           <SmartSuggestionsCard remaining={remaining} items={items} username={username} />
         </div>
