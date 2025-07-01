@@ -1,190 +1,193 @@
 'use client'
 
-import { motion, useAnimation } from 'framer-motion'
-import {
-  RotateCcw,
-  Briefcase,
-  Wallet,
-  Banknote,
-  CreditCard,
-  PiggyBank,
-} from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Volume2, RefreshCw, Brain } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-export default function SavingsProgressChart() {
-  const [baseSalary, setBaseSalary] = useState(0)
-  const [credits, setCredits] = useState(0)
-  const [expenses, setExpenses] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [displayProgress, setDisplayProgress] = useState(0)
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'es', label: 'Español' },
+  { code: 'fr', label: 'Français' },
+] as const
 
-  const iconControls = useAnimation()
-  const strokeControls = useAnimation()
+export default function SmartSuggestionsCard({ remaining }: { remaining: number }) {
+  const [suggestion, setSuggestion] = useState('')
+  const [displayText, setDisplayText] = useState('')
+  const [index, setIndex] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(true)
+  const [username, setUsername] = useState('User')
+  const [gender, setGender] = useState('unspecified')
+  const [language, setLanguage] = useState<'en' | 'hi' | 'es' | 'fr'>('en')
 
-  const fetchData = async () => {
-    const token = localStorage.getItem('token') || ''
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return language === 'hi' ? 'सुप्रभात' : 'Good Morning'
+    if (hour < 17) return language === 'hi' ? 'नमस्कार' : 'Good Afternoon'
+    return language === 'hi' ? 'शुभ संध्या' : 'Good Evening'
+  }
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await fetch('/api/user/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json()
+        setUsername(data?.profile?.name || 'User')
+        setGender(data?.profile?.gender || 'unspecified')
+      } catch {
+        setUsername('User')
+        setGender('unspecified')
+      }
+    }
+    fetchUserData()
+  }, [])
+
+  const getSuggestions = async () => {
+    setLoading(true)
     try {
-      const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/expenses', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('/api/credits', { headers: { Authorization: `Bearer ${token}` } }),
-      ])
-
-      const salaryData = await salaryRes.json()
-      const expensesData = await expenseRes.json()
-      const creditsData = await creditRes.json()
-
-      const expenseList = Array.isArray(expensesData) ? expensesData : expensesData?.data || []
-      const creditList = Array.isArray(creditsData) ? creditsData : creditsData?.data || []
-
-      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
-
-      const base = salaryData?.data?.salary || 0
-      const totalFunds = base + totalCredit
-      const remaining = Math.max(totalFunds - totalExpense, 0)
-      const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
-
-      setBaseSalary(base)
-      setCredits(totalCredit)
-      setExpenses(totalExpense)
-      setProgress(Math.round(percentage))
-    } catch (err) {
-      console.error('❌ Failed to fetch data:', err)
+      const res = await fetch('/api/ai/suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ balance: remaining, username, gender, language }),
+      })
+      const data = await res.json()
+      const fullText = data.answer || `${username}, FinBot couldn’t generate suggestions right now.`
+      setSuggestion(fullText)
+      setDisplayText('')
+      setIndex(0)
+    } catch {
+      const fallback = `${username}, FinBot couldn’t generate suggestions right now.`
+      setSuggestion(fallback)
+      setDisplayText('')
+      setIndex(0)
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (username && gender) getSuggestions()
+  }, [remaining, username, gender, language])
 
   useEffect(() => {
-    let start = 0
-    const duration = 1000
-    const increment = progress / (duration / 20)
-    const counter = setInterval(() => {
-      start += increment
-      if (start >= progress) {
-        start = progress
-        clearInterval(counter)
-      }
-      setDisplayProgress(Math.round(start))
-    }, 20)
+    if (!suggestion || loading) return
+    if (index < suggestion.length) {
+      const timeout = setTimeout(() => {
+        setDisplayText(prev => prev + suggestion.charAt(index))
+        setIndex(prev => prev + 1)
+      }, 15)
+      return () => clearTimeout(timeout)
+    }
+  }, [index, suggestion, loading])
 
-    const offset = 377 - (377 * progress) / 100
-    strokeControls.start({
-      strokeDashoffset: offset,
-      transition: { duration: 1, ease: 'easeInOut' },
-    })
-
-    return () => clearInterval(counter)
-  }, [progress])
-
-  const handleRefresh = async () => {
-    iconControls.start({
-      rotate: 360,
-      transition: { duration: 0.6, ease: 'easeInOut' },
-    })
-    await fetchData()
-    iconControls.set({ rotate: 0 })
+  const speak = () => {
+    if (!suggestion) return
+    const utterance = new SpeechSynthesisUtterance(suggestion)
+    utterance.lang =
+      language === 'hi'
+        ? 'hi-IN'
+        : language === 'es'
+        ? 'es-ES'
+        : language === 'fr'
+        ? 'fr-FR'
+        : 'en-IN'
+    utterance.rate = 1
+    utterance.pitch = 1
+    speechSynthesis.speak(utterance)
   }
-
-  const totalFunds = baseSalary + credits
-  const remaining = Math.max(totalFunds - expenses, 0)
 
   return (
     <motion.div
-      className="w-full min-h-[600px] bg-gradient-to-br from-[#0e0e0f] to-[#1a1a1d] rounded-3xl p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)] text-white backdrop-blur-xl border border-zinc-800"
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full rounded-xl p-6 shadow-xl bg-zinc-950 border border-zinc-800 text-white flex flex-col space-y-4"
     >
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h3 className="text-xl font-bold text-cyan-400 tracking-wide">
-            Savings Overview
-          </h3>
-          <p className="text-sm text-zinc-400">
-            Your current financial snapshot
+      <div className="flex items-center gap-4">
+<div className="bg-emerald-600 text-white rounded-full w-9 h-9 flex items-center justify-center font-semibold text-sm uppercase">
+  {(() => {
+    const cleanName = (username || 'User').trim()
+    const firstLetter = cleanName.length > 0 ? cleanName.charAt(0).toUpperCase() : 'U'
+    return firstLetter
+  })()}
+</div>
+
+        <div className="flex-1">
+          <p className="text-sm font-medium text-emerald-300">
+            {getGreeting()}, {username}
           </p>
         </div>
-        <motion.button
-          onClick={handleRefresh}
-          animate={iconControls}
-          whileHover={{ scale: 1.1 }}
-          className="text-purple-400 hover:text-purple-300 transition-colors"
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as 'en' | 'hi' | 'es' | 'fr')}
+          className="text-xs text-white bg-zinc-800 px-2 py-1 rounded border border-zinc-600"
         >
-          <RotateCcw size={22} />
-        </motion.button>
+          {LANGUAGES.map((lang) => (
+            <option key={lang.code} value={lang.code} className="bg-zinc-800 text-white">
+              {lang.label}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Progress Circle */}
-      <div className="flex justify-center items-center mt-6">
-        <div className="relative w-44 h-44">
-          <div className="absolute inset-0 rounded-full bg-cyan-900/10 blur-2xl z-0 shadow-[0_0_30px_#06b6d4aa]" />
-          <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
-            <circle cx="72" cy="72" r="60" className="stroke-zinc-800" strokeWidth="10" fill="none" />
-            <motion.circle
-              cx="72"
-              cy="72"
-              r="60"
-              stroke="url(#gradient)"
-              strokeWidth="10"
-              fill="none"
-              strokeDasharray="377"
-              strokeDashoffset="377"
-              strokeLinecap="round"
-              animate={strokeControls}
-              style={{ filter: 'drop-shadow(0 0 6px #0ea5e9)' }}
-            />
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="50%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#8b5cf6" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
-            <div className="flex flex-col items-center">
-              <span className="text-white text-[2.4rem] font-mono font-extrabold tracking-tight leading-tight">
-                {displayProgress}%
-              </span>
-              <span className="text-sm text-cyan-400 font-medium">Saved</span>
+      {/* Title */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Brain size={18} className="text-emerald-400" />
+          <h2 className="text-base font-semibold text-white">Fintech AI Insights</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={speak} className="text-zinc-400 hover:text-emerald-300">
+            <Volume2 size={18} />
+          </button>
+          <button onClick={getSuggestions} className="text-zinc-400 hover:text-blue-400">
+            <RefreshCw size={18} />
+          </button>
+        </div>
+      </div>
+
+      {/* Toggle */}
+      <button
+        className="text-xs text-cyan-400 hover:underline self-end"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded
+          ? language === 'hi'
+            ? 'विवरण छुपाएं'
+            : 'Hide'
+          : language === 'hi'
+            ? 'सुझाव दिखाएं'
+            : 'Show'}
+      </button>
+
+      {/* Output */}
+      <AnimatePresence mode="wait">
+        {expanded && (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4 }}
+            className="overflow-hidden"
+          >
+            <div className="text-sm text-slate-300 leading-relaxed min-h-[180px] md:min-h-[220px] p-4 rounded-lg border border-emerald-500/20 bg-zinc-900 relative shadow-sm font-mono whitespace-pre-wrap">
+              {loading ? (
+                <p className="italic text-zinc-500">
+                  {language === 'hi' ? 'FinBot सोच रहा है...' : 'Generating insight...'}
+                </p>
+              ) : (
+                <p className="text-emerald-400">{displayText}</p>
+              )}
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="mt-10 space-y-4 text-sm text-slate-300 px-2">
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Briefcase size={16} className="text-zinc-400" /><span>Base Salary</span></div>
-          <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Wallet size={16} className="text-zinc-400" /><span>Added Money</span></div>
-          <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Banknote size={16} className="text-zinc-400" /><span>Total Funds</span></div>
-          <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><CreditCard size={16} className="text-zinc-400" /><span>Total Spent</span></div>
-          <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2"><PiggyBank size={16} className="text-zinc-400" /><span>Remaining</span></div>
-          <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
-        </div>
-      </div>
-
-      {progress < 30 && (
-        <p className="mt-6 text-xs text-amber-400 text-center italic">
-          Tip: Try to save at least 50% of your income this month.
-        </p>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
