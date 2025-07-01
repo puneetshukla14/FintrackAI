@@ -8,6 +8,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import { motion } from 'framer-motion'
 
 const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -99,9 +100,10 @@ export default function Sidebar() {
 
       <aside
         className={clsx(
-          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between transition-transform duration-0',
+          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
           'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
-          isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'block'
+          'transform transition-transform duration-300 ease-in-out',
+          isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'
         )}
       >
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
@@ -117,38 +119,53 @@ export default function Sidebar() {
         </div>
 
         {/* Links */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
-          {links.map(({ href, label, icon: Icon, isAction }) => (
-            isAction ? (
-              <button
-                key={href}
-                onClick={() => {
-                  if (isMobile) setSidebarOpen(false)
-                  window.location.href = href
-                }}
-                className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
-              >
-                <Icon size={20} className="group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-medium tracking-wide">{label}</span>
-              </button>
-            ) : (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => isMobile && setSidebarOpen(false)}
-                className={clsx(
-                  'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
-                  pathname === href
-                    ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                )}
-              >
-                <Icon size={20} className="group-hover:scale-105 transition-transform" />
-                <span className="text-sm font-medium tracking-wide">{label}</span>
-              </Link>
-            )
-          ))}
-        </div>
+<motion.ul
+  initial="hidden"
+  animate={sidebarOpen || !isMobile ? 'visible' : 'hidden'}
+  variants={{
+    visible: { transition: { staggerChildren: 0.1 } }, // ← increased delay here
+    hidden: { transition: { staggerChildren: 0.03, staggerDirection: -1 } },
+  }}
+  className="flex-1 overflow-y-auto px-5 py-4 space-y-2"
+>
+  {links.map(({ href, label, icon: Icon, isAction }) => (
+    <motion.li
+      key={href}
+      variants={{
+        hidden: { opacity: 0, x: -30 },
+        visible: { opacity: 1, x: 0, transition: { duration: 0.4 } }, // ← slower animation
+      }}
+    >
+      {isAction ? (
+        <button
+          onClick={() => {
+            if (isMobile) setSidebarOpen(false)
+            window.location.href = href
+          }}
+          className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
+        >
+          <Icon size={20} className="group-hover:scale-110 transition-transform" />
+          <span className="text-sm font-medium tracking-wide">{label}</span>
+        </button>
+      ) : (
+        <Link
+          href={href}
+          onClick={() => isMobile && setSidebarOpen(false)}
+          className={clsx(
+            'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
+            pathname === href
+              ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
+              : 'text-white/70 hover:text-white hover:bg-white/10'
+          )}
+        >
+          <Icon size={20} className="group-hover:scale-105 transition-transform" />
+          <span className="text-sm font-medium tracking-wide">{label}</span>
+        </Link>
+      )}
+    </motion.li>
+  ))}
+</motion.ul>
+
 
         {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
