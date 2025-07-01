@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
-import useAuth from '@/hooks/useAuth'
+
 
 
 
