@@ -53,6 +53,7 @@ export default function UserProfilePage() {
       })
 
       if (res.ok) {
+        window.dispatchEvent(new Event('profileUpdated'))
         setMessage('✅ Profile updated successfully.')
       } else {
         setMessage('❌ Failed to update profile.')
