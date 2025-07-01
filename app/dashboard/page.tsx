@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import CalendarCard from '@/components/dashboard/CalendarCard'
+import ExpenseCategoryCard from '@/components/dashboard/ExpenseCategoryCard'
+
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
@@ -69,24 +71,34 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-    <main className="p-6 space-y-6">
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-        {/* 👇 Salary Card - Normal width */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
-          <SalaryCard />
-        </div>
+<main className="p-6 space-y-6">
+<section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {/* 👇 Salary Card - Normal width */}
+    <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
+      <SalaryCard />
+    </div>
 
 {/* 👇 AI Suggestions Card - Wider on desktop, content-height based */} 
 <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2">
   <SmartSuggestionsCard remaining={remaining} />
 </div>
 
+
+
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
       <CalendarCard />
     </div>
 
-      </section> {/* ✅ This was missing */}
-    </main>
+
+{/* 👇 Expense Breakdown Card - Full width */}
+<div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3">
+  <ExpenseCategoryCard />
+</div>
+
+
+
+    
+  </section>
+</main>
   )
 }
