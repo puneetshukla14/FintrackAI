@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
-import CalendarCard from '@/components/dashboard/CalendarCard'
+
 import SalaryCard from '@/components/dashboard/SalaryCard'
 
 export default function DashboardPage() {
@@ -82,9 +82,7 @@ export default function DashboardPage() {
     </div>
 
 
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
-      <CalendarCard />
-    </div>
+
     </main>
   )
 }
