@@ -25,37 +25,20 @@ export default function SavingsProgressChart() {
     const token = localStorage.getItem('token') || ''
     try {
       const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/expenses', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/credits', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        fetch('/api/user/salary', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/expenses', { headers: { Authorization: `Bearer ${token}` } }),
+        fetch('/api/credits', { headers: { Authorization: `Bearer ${token}` } }),
       ])
 
       const salaryData = await salaryRes.json()
       const expensesData = await expenseRes.json()
       const creditsData = await creditRes.json()
 
-      const expenseList = Array.isArray(expensesData)
-        ? expensesData
-        : expensesData?.data || []
+      const expenseList = Array.isArray(expensesData) ? expensesData : expensesData?.data || []
+      const creditList = Array.isArray(creditsData) ? creditsData : creditsData?.data || []
 
-      const creditList = Array.isArray(creditsData)
-        ? creditsData
-        : creditsData?.data || []
-
-      const totalExpense = expenseList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-      const totalCredit = creditList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
+      const totalExpense = expenseList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
+      const totalCredit = creditList.reduce((sum: number, item: any) => sum + (item.amount || 0), 0)
 
       const base = salaryData?.data?.salary || 0
       const totalFunds = base + totalCredit
@@ -67,7 +50,7 @@ export default function SavingsProgressChart() {
       setExpenses(totalExpense)
       setProgress(Math.round(percentage))
     } catch (err) {
-      console.error('Failed to fetch data:', err)
+      console.error('❌ Failed to fetch data:', err)
     }
   }
 
@@ -107,7 +90,7 @@ export default function SavingsProgressChart() {
   }
 
   const totalFunds = baseSalary + credits
-  const remaining = totalFunds - expenses
+  const remaining = Math.max(totalFunds - expenses, 0)
 
   return (
     <motion.div
@@ -140,14 +123,7 @@ export default function SavingsProgressChart() {
         <div className="relative w-44 h-44">
           <div className="absolute inset-0 rounded-full bg-cyan-900/10 blur-2xl z-0 shadow-[0_0_30px_#06b6d4aa]" />
           <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
-            <circle
-              cx="72"
-              cy="72"
-              r="60"
-              className="stroke-zinc-800"
-              strokeWidth="10"
-              fill="none"
-            />
+            <circle cx="72" cy="72" r="60" className="stroke-zinc-800" strokeWidth="10" fill="none" />
             <motion.circle
               cx="72"
               cy="72"
