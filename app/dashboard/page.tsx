@@ -1,49 +1,42 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 import SalaryCard from '@/components/dashboard/SalaryCard'
+import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+import useAuth from '@/hooks/useAuth'
 
+import CalendarCard from '@/components/dashboard/CalendarCard'
 
 export default function DashboardPage() {
+  const { loading, isLoggedIn } = useAuth()
+
   const [userSalary, setUserSalary] = useState(0)
   const [totalExpenses, setTotalExpenses] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem('token')
+
       try {
         const profileRes = await fetch('/api/user/profile', {
-          method: 'GET',
-          credentials: 'include',
+          headers: { Authorization: `Bearer ${token}` },
         })
-
-        if (profileRes.status === 401) {
-          window.location.href = '/sign-in'
-          return
-        }
-
         const profileData = await profileRes.json()
         const salary = profileData?.profile?.monthlySalary || 0
         setUserSalary(salary)
 
         const expenseRes = await fetch('/api/expenses', {
-          method: 'GET',
-          credentials: 'include',
+          headers: { Authorization: `Bearer ${token}` },
         })
-
         const expenses = await expenseRes.json()
+
         const total = Array.isArray(expenses)
           ? expenses.reduce((sum, item) => sum + (item.amount || 0), 0)
           : 0
 
         setTotalExpenses(total)
-      } catch (err) {
-        console.error('❌ Failed to fetch dashboard data:', err)
-        setError(true)
-      } finally {
-        setLoading(false)
+      } catch (error) {
+        console.error('Failed to fetch salary/expenses:', error)
       }
     }
 
@@ -58,13 +51,7 @@ export default function DashboardPage() {
     )
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-red-400 bg-black">
-        Failed to load dashboard.
-      </div>
-    )
-  }
+  if (!isLoggedIn) return null
 
   const remaining = userSalary - totalExpenses
 
@@ -80,7 +67,15 @@ export default function DashboardPage() {
     <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2 h-full">
       <SmartSuggestionsCard remaining={remaining} />
     </div>
+
+
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
+      <CalendarCard />
+    </div>
+
+    
   </section>
 </main>
+
   )
 }
