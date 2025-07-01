@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard, CreditCard, Wallet, Calendar, Bot,
-  BarChart, Settings, Lock, X, Menu, LogOut, User, FileText
+  BarChart, Settings, Lock, X, Menu, LogOut, User, FileText, PlusCircle
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
-import { PlusCircle } from 'lucide-react'
 
 const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,7 +27,6 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [devMode, setDevMode] = useState(false)
   const [userName, setUserName] = useState('')
   const [gender, setGender] = useState('')
   const [loading, setLoading] = useState(true)
@@ -55,7 +53,11 @@ export default function Sidebar() {
     fetchUserProfile()
   }, [])
 
-  const getAvatarSrc = () => gender === 'Male' ? '/avatars/male.png' : gender === 'Female' ? '/avatars/female.png' : ''
+  const getAvatarSrc = () => gender === 'Male'
+    ? '/avatars/male.png'
+    : gender === 'Female'
+    ? '/avatars/female.png'
+    : ''
 
   useEffect(() => {
     const updateSize = () => setIsMobile(window.innerWidth < 768)
@@ -67,9 +69,6 @@ export default function Sidebar() {
   useEffect(() => {
     document.body.style.overflow = isMobile && sidebarOpen ? 'hidden' : 'auto'
   }, [isMobile, sidebarOpen])
-
-  useEffect(() => setDevMode(localStorage.getItem('devMode') === 'true'), [])
-  useEffect(() => localStorage.setItem('devMode', devMode.toString()), [devMode])
 
   const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/'
@@ -107,6 +106,7 @@ export default function Sidebar() {
       >
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
 
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
           <h1 className="text-xl font-bold tracking-wide text-white/90">ExpenseX Pro</h1>
           {isMobile && (
@@ -116,6 +116,7 @@ export default function Sidebar() {
           )}
         </div>
 
+        {/* Links */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
           {links.map(({ href, label, icon: Icon, isAction }, i) => (
             <motion.div
@@ -141,9 +142,9 @@ export default function Sidebar() {
                   onClick={() => isMobile && setSidebarOpen(false)}
                   className={clsx(
                     'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
-                    pathname === href ?
-                      'bg-white/10 text-white font-semibold backdrop-blur-sm' :
-                      'text-white/70 hover:text-white hover:bg-white/10'
+                    pathname === href
+                      ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
                   )}
                 >
                   <Icon size={20} className="group-hover:scale-105 transition-transform" />
@@ -154,11 +155,21 @@ export default function Sidebar() {
           ))}
         </div>
 
+        {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
-          <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group cursor-pointer">
+
+          {/* Profile Link */}
+          <Link
+            href="/userprofile"
+            className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
+          >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
               {getAvatarSrc() ? (
-                <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
+                <img
+                  src={getAvatarSrc()}
+                  alt="User Avatar"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <User className="text-white w-5 h-5" />
               )}
@@ -167,10 +178,13 @@ export default function Sidebar() {
               <span className="text-sm font-medium text-white group-hover:text-blue-300">
                 {loading ? 'Loading...' : userName || 'Guest'}
               </span>
-              <span className="text-xs text-white/60">View Profile</span>
+              <span className="text-xs text-white/60 group-hover:text-blue-300 transition">
+                View Profile
+              </span>
             </div>
-          </div>
+          </Link>
 
+          {/* Logout */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
@@ -179,46 +193,11 @@ export default function Sidebar() {
             <span className="text-sm tracking-wide">Logout</span>
           </button>
 
+          {/* Footer Note */}
           <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
             <span>v1.0 • ExpenseX Pro</span>
             <span className="text-[10px] text-blue-400">Puneet Shukla Tech</span>
           </div>
-
-          {isMobile && (
-            <div className="mt-4 px-2">
-              <div className="px-3 py-2 bg-white/10 border border-white/20 rounded-full flex items-center justify-between">
-                <span className="text-white text-xs font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-white to-blue-400 animate-pulse">
-                  Dev Mode
-                </span>
-                <button
-                  onClick={() => setDevMode(prev => !prev)}
-                  className="w-14 h-6 flex items-center bg-white/10 rounded-full p-1 border border-white/30 relative overflow-hidden"
-                >
-                  <motion.div
-                    layout
-                    className="w-5 h-5 rounded-full bg-white shadow-md z-10"
-                    animate={{ x: devMode ? 28 : 0 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  />
-                  {!devMode && (
-                    <motion.div
-                      initial={{ x: 6, opacity: 0 }}
-                      animate={{ x: 2, opacity: 1 }}
-                      transition={{
-                        repeat: Infinity,
-                        repeatType: 'reverse',
-                        duration: 0.8,
-                        ease: 'easeInOut',
-                      }}
-                      className="absolute left-1 text-white text-xs pointer-events-none z-0"
-                    >
-                      ←
-                    </motion.div>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </motion.aside>
     </>
