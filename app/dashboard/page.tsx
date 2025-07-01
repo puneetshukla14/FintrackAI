@@ -70,16 +70,17 @@ export default function DashboardPage() {
 
   return (
     <main className="p-6 space-y-6">
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
         {/* 👇 Salary Card - Normal width */}
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
           <SalaryCard />
         </div>
 
-        {/* 👇 AI Suggestions Card - Wider on desktop */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2 h-full">
-          <SmartSuggestionsCard remaining={remaining} />
-        </div>
+{/* 👇 AI Suggestions Card - Wider on desktop, content-height based */} 
+<div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2">
+  <SmartSuggestionsCard remaining={remaining} />
+</div>
 
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
       <CalendarCard />
