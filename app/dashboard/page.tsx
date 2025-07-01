@@ -5,7 +5,7 @@ import SalaryCard from '@/components/dashboard/SalaryCard'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 import useAuth from '@/hooks/useAuth'
 
-import CalendarCard from '@/components/dashboard/CalendarCard'
+
 
 export default function DashboardPage() {
   const { loading, isLoggedIn } = useAuth()
@@ -68,10 +68,6 @@ export default function DashboardPage() {
       <SmartSuggestionsCard remaining={remaining} />
     </div>
 
-
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
-      <CalendarCard />
-    </div>
 
     
   </section>
