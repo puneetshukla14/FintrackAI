@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import CalendarCard from '@/components/dashboard/CalendarCard'
 import ExpenseCategoryCard from '@/components/dashboard/ExpenseCategoryCard'
