@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
-
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import CalendarCard from '@/components/dashboard/CalendarCard'
 import ExpenseCategoryCard from '@/components/dashboard/ExpenseCategoryCard'
-
+import { motion } from 'framer-motion'
+import { Loader2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
@@ -55,16 +55,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-white bg-black">
-        Loading...
+      <div className="min-h-screen flex flex-col gap-2 justify-center items-center bg-zinc-950 text-white">
+        <Loader2 className="animate-spin w-6 h-6 text-emerald-400" />
+        <span className="text-sm text-zinc-400">Loading dashboard...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-red-400 bg-black">
-        Failed to load dashboard.
+      <div className="min-h-screen flex justify-center items-center text-red-400 bg-zinc-950">
+        <p className="text-lg font-medium">Something went wrong. Try refreshing the page.</p>
       </div>
     )
   }
@@ -72,35 +73,33 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-<main className="p-6 space-y-6 xl:pl-[5.5rem]">
+    <main className="min-h-screen p-6 space-y-6 xl:pl-[5.5rem] bg-gradient-to-br from-zinc-950 to-zinc-900 text-white">
+      <motion.section
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+      >
+        {/* Salary Card */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
+          <SalaryCard />
+        </div>
 
-<section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-    {/* 👇 Salary Card - Normal width */}
-    <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
-      <SalaryCard />
-    </div>
+        {/* AI Suggestions */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2">
+          <SmartSuggestionsCard remaining={remaining} />
+        </div>
 
-{/* 👇 AI Suggestions Card - Wider on desktop, content-height based */} 
-<div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2">
-  <SmartSuggestionsCard remaining={remaining} />
-</div>
-
-
-
+        {/* Calendar */}
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
-      <CalendarCard />
-    </div>
+          <CalendarCard />
+        </div>
 
-
-{/* 👇 Expense Breakdown Card - Full width */}
-<div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3">
-  <ExpenseCategoryCard />
-</div>
-
-
-
-    
-  </section>
-</main>
+        {/* Expense Category Breakdown */}
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3">
+          <ExpenseCategoryCard />
+        </div>
+      </motion.section>
+    </main>
   )
 }
