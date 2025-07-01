@@ -4,11 +4,80 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Your custom styles below */
-html,
-body {
+/* ===== Global Styles ===== */
+html {
+  font-family: 'Inter', sans-serif;
   height: 100%;
-  background-color: black;
-  color: white;
-  overflow: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  background-color: #000; /* Dark base */
+  color: #f5f5f5;          /* Subtle white text */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* ===== Scrollbar Styles ===== */
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #52525b; /* Tailwind zinc-600 */
+  border-radius: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===== Selection Highlight ===== */
+::selection {
+  background: #22c55e; /* Tailwind emerald-500 */
+  color: #000;
+}
+
+/* ===== Global Transition ===== */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* ===== Utility Layer for Animations ===== */
+@layer utilities {
+  /* Typewriter animation with blinking cursor */
+  .animate-typewriter {
+    animation: typing 3s steps(60, end), blink 1s step-end infinite;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    border-right: 2px solid #22c55e;
+  }
+
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes blink {
+    0%, 100% { border-color: transparent; }
+    50% { border-color: #22c55e; }
+  }
+
+  /* Optional pulse background (for AI-like cards) */
+  .bg-animated-ai {
+    background: linear-gradient(270deg, #0f172a, #1e293b, #0f172a);
+    background-size: 600% 600%;
+    animation: pulseBackground 15s ease infinite;
+  }
+
+  @keyframes pulseBackground {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
