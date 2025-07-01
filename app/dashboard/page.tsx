@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
 import SalaryCard from '@/components/dashboard/SalaryCard'
+import CalendarCard from '@/components/dashboard/CalendarCard'
 
 export default function DashboardPage() {
   const [userSalary, setUserSalary] = useState(0)
@@ -79,6 +80,11 @@ export default function DashboardPage() {
         <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2 h-full">
           <SmartSuggestionsCard remaining={remaining} />
         </div>
+
+        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-3 h-full">
+      <CalendarCard />
+    </div>
+
       </section> {/* ✅ This was missing */}
     </main>
   )
