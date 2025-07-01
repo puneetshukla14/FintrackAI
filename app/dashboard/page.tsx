@@ -71,7 +71,8 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-<main className="p-6 space-y-6">
+<main className="p-6 space-y-6 xl:pl-[5.5rem]">
+
 <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
     {/* 👇 Salary Card - Normal width */}
     <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
