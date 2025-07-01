@@ -31,27 +31,39 @@ export default function Sidebar() {
   const [gender, setGender] = useState('')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function fetchUserProfile() {
-      try {
-        const res = await fetch('/api/user/profile')
-        const data = await res.json()
-        if (res.status === 404 || data.error === 'User not found') {
-          window.location.href = '/sign-up'
-          return
-        }
-        if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
-        setUserName(data?.profile?.fullName || 'Guest')
-        setGender(data?.profile?.gender || '')
-      } catch (err) {
-        console.error('Sidebar: Error fetching profile', err)
+useEffect(() => {
+  async function fetchUserProfile() {
+    try {
+      const res = await fetch('/api/user/profile')
+      const data = await res.json()
+      if (res.status === 404 || data.error === 'User not found') {
         window.location.href = '/sign-up'
-      } finally {
-        setLoading(false)
+        return
       }
+      if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
+      setUserName(data?.profile?.fullName || 'Guest')
+      setGender(data?.profile?.gender || '')
+    } catch (err) {
+      console.error('Sidebar: Error fetching profile', err)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  fetchUserProfile()
+
+  // ✅ Listen for profile update
+  const handleProfileUpdated = () => {
     fetchUserProfile()
-  }, [])
+  }
+
+  window.addEventListener('profileUpdated', handleProfileUpdated)
+
+  return () => {
+    window.removeEventListener('profileUpdated', handleProfileUpdated)
+  }
+}, [])
+
 
   const getAvatarSrc = () => gender === 'Male'
     ? '/avatars/male.png'
