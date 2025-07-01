@@ -154,7 +154,6 @@ export default function Sidebar() {
             </motion.div>
           ))}
         </div>
-
         {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
 
