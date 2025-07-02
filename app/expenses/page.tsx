@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { triggerHeaderUpdate } from '@/lib/events' //
 import {
   FiRefreshCw, FiCalendar, FiClock, FiTag, FiMapPin,
   FiFileText, FiCreditCard, FiDollarSign, FiSave
@@ -94,51 +95,56 @@ export default function ExpensesPage() {
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
 
-    const data = {
-      amount: Number(amount),
-      date,
-      time: includeTime ? time : '',
-      includeTime,
-      category: `${mainCategory} - ${subCategory}`,
-      paymentMethod,
-      tags,
-      notes,
-      location,
-      recurring,
-      multiEntry,
-    }
-
-    try {
-      const token = localStorage.getItem('token') || ''
-
-      const res = await fetch('/api/expenses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      })
-
-      const result = await res.json()
-
-      if (res.ok) {
-        alert('Expense saved successfully!')
-        setAmount('')
-        setNotes('')
-        setTags('')
-        setSubCategory('')
-      } else {
-        alert(`Error: ${result.error || 'Unknown error occurred'}`)
-      }
-    } catch (err) {
-      alert('Network error. Please try again.')
-      console.error(err)
-    }
+  const data = {
+    amount: Number(amount),
+    date,
+    time: includeTime ? time : '',
+    includeTime,
+    category: `${mainCategory} - ${subCategory}`,
+    paymentMethod,
+    tags,
+    notes,
+    location,
+    recurring,
+    multiEntry,
   }
+
+  try {
+    const token = localStorage.getItem('token') || ''
+
+    const res = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    const result = await res.json()
+
+    if (res.ok) {
+      alert('Expense saved successfully!')
+
+      // ✅ 🔥 Call this to update Header in real-time
+      triggerHeaderUpdate()
+
+      // Reset form
+      setAmount('')
+      setNotes('')
+      setTags('')
+      setSubCategory('')
+    } else {
+      alert(`Error: ${result.error || 'Unknown error occurred'}`)
+    }
+  } catch (err) {
+    alert('Network error. Please try again.')
+    console.error(err)
+  }
+}
 
   return (
     <div className="min-h-screen bg-neutral-950 text-white px-4 py-6 sm:px-6 lg:px-8 overflow-auto">
