@@ -5,8 +5,6 @@ useEffect(() => {
     try {
         window.location.href = '/sign-up'
         return
-  }
-
   fetchUserProfile()
 
   // ✅ Listen for profile update
