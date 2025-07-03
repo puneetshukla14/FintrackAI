@@ -12,11 +12,7 @@
     except Exception as e:
         print("❌ Update check failed:", e)
 
-def download_and_run(download_url):
-    try:
-        file_name = "SSiSutra_Update.exe"
-        with open(file_name, 'wb') as f:
-            res = requests.get(download_url, stream=True)
+def download_and_run(download_url):s.get(download_url, stream=True)
             for chunk in res.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
