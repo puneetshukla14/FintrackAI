@@ -1,6 +1,5 @@
 
 
- href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/expenses', label: ' Add Expenses', icon: CreditCard },
   { href: '/myexpenses', label: 'My Expenses', icon: Wallet },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
