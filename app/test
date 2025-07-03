@@ -5,15 +5,6 @@ useEffect(() => {
     try {
         window.location.href = '/sign-up'
         return
-      }
-      if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
-      setUserName(data?.profile?.fullName || 'Guest')
-      setGender(data?.profile?.gender || '')
-    } catch (err) {
-      console.error('Sidebar: Error fetching profile', err)
-    } finally {
-      setLoading(false)
-    }
   }
 
   fetchUserProfile()
