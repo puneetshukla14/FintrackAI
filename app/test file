@@ -2,7 +2,7 @@
 
 
         res = requests.get(VERSION
-        latest = data.g
+        latest = da
         download_url = data.get("
 
         if latest > CURRENT_VERSION:
