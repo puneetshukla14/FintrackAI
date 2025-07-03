@@ -1,7 +1,6 @@
 import requests
 import subprocess
 import sys
-from tkinter import messagebox
 
 
 def check_for_update(
