@@ -23,9 +23,6 @@ useEffect(() => {
     fetchUserProfile()
   }
 
-  window.addEventListener('profileUpdated', handleProfileUpdated)
-
-  return () => {
     window.removeEventListener('profileUpdated', handleProfileUpdated)
   }
 }, [])
