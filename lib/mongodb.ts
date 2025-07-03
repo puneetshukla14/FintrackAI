@@ -20,6 +20,7 @@ const globalWithMongoose = global as typeof globalThis & {
   }
 }
 
+
 if (!globalWithMongoose._mongoose) {
   globalWithMongoose._mongoose = { conn: null, promise: null }
 }
