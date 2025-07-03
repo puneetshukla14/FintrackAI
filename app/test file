@@ -27,5 +27,4 @@ def download_and_run(download_url):
         subprocess.Popen([file_name])
         sys.exit()
 
-    except Exception as e:
-        messagebox.showerror("Download Error", f"❌ Failed to download update:\n{e}")
+    except Exception as e:n{e}")
