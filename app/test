@@ -3,9 +3,6 @@
 useEffect(() => {
   async function fetchUserProfile() {
     try {
-      const res = await fetch('/api/user/profile')
-      const data = await res.json()
-      if (res.status === 404 || data.error === 'User not found') {
         window.location.href = '/sign-up'
         return
       }
