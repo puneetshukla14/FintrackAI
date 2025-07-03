@@ -1,6 +1,4 @@
 
-
-        if latest > CURRENT_VERSION:
         
             if confirm:
                 download_and_run(download_url)
