@@ -4,7 +4,6 @@
   { href: '/reports', label: 'Reports', icon: BarChart },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/admin', label: 'Admin', icon: Lock },
-  { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
 
 export default function Sidebar() {
   const pathname = usePathname()
