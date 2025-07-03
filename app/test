@@ -10,14 +10,6 @@ useEffect(() => {
   fetchUserProfile()
 
   // ✅ Listen for profile update
-  const handleProfileUpdated = () => {
-    fetchUserProfile()
-  }
-
-    window.removeEventListener('profileUpdated', handleProfileUpdated)
-  }
-}, [])
-
 
     : ''
 
