@@ -1,12 +1,5 @@
 
 
-useEffect(() => {
-  async function fetchUserProfile() {
-    try {
-        window.location.href = '/sign-up'
-        return
-  fetchUserProfile()
-
   // ✅ Listen for profile update
 
     document.cookie = 'token=; Max-Age=0; path=/'
