@@ -1,10 +1,5 @@
 
 
-
-
-        latest = da
-        download_url = data.get("
-
         if latest > CURRENT_VERSION:
         
             if confirm:
