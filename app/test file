@@ -1,2 +1,39 @@
-e
-s
+import requests
+import subprocess
+import sys
+from tkinter import messagebox
+
+# 🔁 Define current app version
+CURRENT_VERSION = "1.0"
+
+# 🔗 Remote version info file (host it yourself on Firebase, GitHub, etc.)
+VERSION_CHECK_URL = "https://yourdomain.com/update.json"
+
+def check_for_update():
+    try:
+        res = requests.get(VERSION_CHECK_URL)
+        data = res.json()
+        latest = data.get("version")
+        download_url = data.get("download_url")
+
+        if latest > CURRENT_VERSION:
+            confirm = messagebox.askyesno("🆕 Update Available", f"Version {latest} is available.\nDo you want to install it?")
+            if confirm:
+                download_and_run(download_url)
+    except Exception as e:
+        print("❌ Update check failed:", e)
+
+def download_and_run(download_url):
+    try:
+        file_name = "SSiSutra_Update.exe"
+        with open(file_name, 'wb') as f:
+            res = requests.get(download_url, stream=True)
+            for chunk in res.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+
+        subprocess.Popen([file_name])
+        sys.exit()
+
+    except Exception as e:
+        messagebox.showerror("Download Error", f"❌ Failed to download update:\n{e}")
