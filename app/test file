@@ -1,7 +1,7 @@
 
 
 
-        res = requests.get(VERSION
+
         latest = da
         download_url = data.get("
 
