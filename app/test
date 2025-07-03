@@ -1,10 +1,5 @@
 
 
-  { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
-  { href: '/reports', label: 'Reports', icon: BarChart },
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/admin', label: 'Admin', icon: Lock },
-
 export default function Sidebar() {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
