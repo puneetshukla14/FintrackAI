@@ -1,15 +1,5 @@
 
-'use client'
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import {
-  LayoutDashboard, CreditCard, Wallet, Calendar, Bot,
-  BarChart, Settings, Lock, X, Menu, LogOut, User, FileText, PlusCircle
-} from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import clsx from 'clsx'
 
 const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
