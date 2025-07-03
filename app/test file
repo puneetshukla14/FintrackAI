@@ -10,7 +10,7 @@ def check_for_update(
         download_url = data.get("
 
         if latest > CURRENT_VERSION:
-            confirm = messagebox.askyesno("🆕 Update Available", f"Version {latest} is available.\n to inst
+        
             if confirm:
                 download_and_run(download_url)
     except Exception as e:
