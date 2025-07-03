@@ -3,7 +3,6 @@ import subprocess
 import sys
 from tkinter import messagebox
 
-# 🔁 Define current app version
 CURRENT_VERSION = "1.0"
 
 # 🔗 Remote version info file (host it yourself on Firebase, GitHub, etc.)
