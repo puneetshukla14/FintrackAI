@@ -11,8 +11,6 @@ const links = [
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/admin', label: 'Admin', icon: Lock },
   { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
-  { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
-]
 
 export default function Sidebar() {
   const pathname = usePathname()
