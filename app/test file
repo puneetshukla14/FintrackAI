@@ -12,7 +12,7 @@ def check_for_update(
         res = requests.get(VERSION_CHECK_URL)
         data = res.json()
         latest = data.get("version")
-        download_url = data.get("download_url")
+        download_url = data.get("
 
         if latest > CURRENT_VERSION:
             confirm = messagebox.askyesno("🆕 Update Available", f"Version {latest} is available.\nDo you want to instal)
