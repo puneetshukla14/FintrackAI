@@ -5,7 +5,7 @@ import subprocess
 
 def check_for_update(
     try:
-        res = requests.get(VERSION_CHEC
+        res = requests.get(VERSION
         latest = data.get("version")
         download_url = data.get("
 
