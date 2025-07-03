@@ -1,6 +1,6 @@
 import requests
 import subprocess
-import sys
+
 
 
 def check_for_update(
