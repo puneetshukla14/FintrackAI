@@ -1,9 +1,6 @@
 
 
 
-
-def check_for_update(
-    try:
         res = requests.get(VERSION
         latest = data.g
         download_url = data.get("
