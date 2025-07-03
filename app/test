@@ -2,16 +2,6 @@
 
 
 
-  return (
-    <>
-      {isMobile && !sidebarOpen && (
-        <button
-          className="fixed top-4 left-4 z-50 backdrop-blur-md p-3 rounded-lg border border-white/10 bg-white/10 text-white shadow-md"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu size={20} />
-        </button>
-      )}
 
       {isMobile && sidebarOpen && (
         <div
