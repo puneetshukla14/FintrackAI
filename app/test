@@ -1,6 +1,5 @@
 
 
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
   { href: '/reports', label: 'Reports', icon: BarChart },
   { href: '/settings', label: 'Settings', icon: Settings },
