@@ -21,55 +21,56 @@ export default function SavingsProgressChart() {
   const iconControls = useAnimation()
   const strokeControls = useAnimation()
 
-  const fetchData = async () => {
-    const token = localStorage.getItem('token') || ''
-    try {
-      const [salaryRes, expenseRes, creditRes] = await Promise.all([
-        fetch('/api/user/salary', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/expenses', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('/api/credits', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ])
+const fetchData = async () => {
+  const token = localStorage.getItem('token') || ''
+  try {
+    const [profileRes, expenseRes, creditRes] = await Promise.all([
+      fetch('/api/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch('/api/expenses', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch('/api/credits', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ])
 
-      const salaryData = await salaryRes.json()
-      const expensesData = await expenseRes.json()
-      const creditsData = await creditRes.json()
+    const profileData = await profileRes.json()
+    const expensesData = await expenseRes.json()
+    const creditsData = await creditRes.json()
 
-      const expenseList = Array.isArray(expensesData)
-        ? expensesData
-        : expensesData?.data || []
+    const expenseList = Array.isArray(expensesData)
+      ? expensesData
+      : expensesData?.data || []
 
-      const creditList = Array.isArray(creditsData)
-        ? creditsData
-        : creditsData?.data || []
+    const creditList = Array.isArray(creditsData)
+      ? creditsData
+      : creditsData?.data || []
 
-      const totalExpense = expenseList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
-      const totalCredit = creditList.reduce(
-        (sum: number, item: any) => sum + (item.amount || 0),
-        0
-      )
+    const totalExpense = expenseList.reduce(
+      (sum: number, item: any) => sum + (item.amount || 0),
+      0
+    )
+    const totalCredit = creditList.reduce(
+      (sum: number, item: any) => sum + (item.amount || 0),
+      0
+    )
 
-      const base = salaryData?.data?.salary || 0
-      const totalFunds = base + totalCredit
-      const remaining = Math.max(totalFunds - totalExpense, 0)
-      const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
+    const base = profileData?.profile?.bankBalance || 0
+    const totalFunds = base + totalCredit
+    const remaining = Math.max(totalFunds - totalExpense, 0)
+    const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
 
-      setBaseSalary(base)
-      setCredits(totalCredit)
-      setExpenses(totalExpense)
-      setProgress(Math.round(percentage))
-    } catch (err) {
-      console.error('Failed to fetch data:', err)
-    }
+    setBaseSalary(base)
+    setCredits(totalCredit)
+    setExpenses(totalExpense)
+    setProgress(Math.round(percentage))
+  } catch (err) {
+    console.error('Failed to fetch data:', err)
   }
+}
+
 
   useEffect(() => {
     fetchData()
@@ -179,30 +180,45 @@ export default function SavingsProgressChart() {
           </div>
         </div>
       </div>
+{/* Stats */}
+<div className="mt-10 space-y-4 text-sm text-slate-300 px-2">
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <Wallet size={16} className="text-zinc-400" />
+      <span>Bank Balance</span>
+    </div>
+    <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <PiggyBank size={16} className="text-zinc-400" />
+      <span>Added Money</span>
+    </div>
+    <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <Banknote size={16} className="text-zinc-400" />
+      <span>Total Funds</span>
+    </div>
+    <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <CreditCard size={16} className="text-zinc-400" />
+      <span>Total Spent</span>
+    </div>
+    <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center">
+    <div className="flex items-center gap-2">
+      <Briefcase size={16} className="text-zinc-400" />
+      <span>Remaining</span>
+    </div>
+    <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
+  </div>
+</div>
 
-      {/* Stats */}
-      <div className="mt-10 space-y-4 text-sm text-slate-300 px-2">
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Briefcase size={16} className="text-zinc-400" /><span>Base Salary</span></div>
-          <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Wallet size={16} className="text-zinc-400" /><span>Added Money</span></div>
-          <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><Banknote size={16} className="text-zinc-400" /><span>Total Funds</span></div>
-          <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
-          <div className="flex items-center gap-2"><CreditCard size={16} className="text-zinc-400" /><span>Total Spent</span></div>
-          <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2"><PiggyBank size={16} className="text-zinc-400" /><span>Remaining</span></div>
-          <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
-        </div>
-      </div>
 
       {progress < 30 && (
         <p className="mt-6 text-xs text-amber-400 text-center italic">
