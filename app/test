@@ -1,11 +1,6 @@
 
 
-  // ✅ Listen for profile update
 
-    document.cookie = 'token=; Max-Age=0; path=/'
-    localStorage.removeItem('token')
-    window.location.href = '/sign-up'
-  }
 
   return (
     <>
