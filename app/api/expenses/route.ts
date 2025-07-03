@@ -3,7 +3,6 @@ import dbConnect from '@/lib/mongodb'
 import { verifyToken } from '@/lib/auth'
 import UserData from '@/models/UserData'
 
-// Define the structure of an expense
 interface Expense {
   amount: number
   date: string
@@ -11,19 +10,12 @@ interface Expense {
   description: string
 }
 
-// Categorize expenses based on description keywords
 function getCategory(desc: string): string {
   const lowered = desc.toLowerCase()
-
-  if (lowered.includes('zomato') || lowered.includes('swiggy')) return 'Dining'
-  if (lowered.includes('uber') || lowered.includes('ola')) return 'Travel'
+  if (lowered.includes('zomato') || lowered.includes('swiggy')) return 'Food'
+  if (lowered.includes('uber') || lowered.includes('ola')) return 'Transport'
   if (lowered.includes('amazon') || lowered.includes('flipkart')) return 'Shopping'
   if (lowered.includes('rent')) return 'Rent'
-  if (lowered.includes('electricity') || lowered.includes('water') || lowered.includes('bill')) return 'Bills'
-  if (lowered.includes('doctor') || lowered.includes('hospital')) return 'Health'
-  if (lowered.includes('school') || lowered.includes('tuition')) return 'Education'
-  if (lowered.includes('netflix') || lowered.includes('spotify')) return 'Subscriptions'
-
   return 'Other'
 }
 
@@ -32,14 +24,11 @@ export async function POST(req: NextRequest) {
     await dbConnect()
 
     const token = req.cookies.get('token')?.value
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
-    }
+    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
     const decoded = verifyToken(token) as { username: string }
-    const body = await req.json()
 
-    const { amount, description = 'No description', date, category } = body
+    const { amount, description = 'No description', date, category } = await req.json()
 
     if (typeof amount !== 'number') {
       return NextResponse.json({ error: 'Amount must be a number' }, { status: 400 })
@@ -52,13 +41,13 @@ export async function POST(req: NextRequest) {
       category: category || getCategory(description),
     }
 
-    const updatedUser = await UserData.findOneAndUpdate(
+    const update = await UserData.findOneAndUpdate(
       { username: decoded.username },
       { $push: { expenses: expense } },
       { new: true }
     )
 
-    return NextResponse.json({ success: true, data: updatedUser?.expenses || [] })
+    return NextResponse.json({ success: true, data: update?.expenses || [] })
   } catch (err) {
     console.error('❌ Error saving expense:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -70,19 +59,16 @@ export async function GET(req: NextRequest) {
     await dbConnect()
 
     const token = req.cookies.get('token')?.value
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
-    }
+    if (!token) return NextResponse.json({ error: 'Unauthorized (no token)' }, { status: 401 })
 
     const decoded = verifyToken(token) as { username: string }
+    const userDoc = await UserData.findOne({ username: decoded.username })
 
-    const user = await UserData.findOne({ username: decoded.username })
-
-    if (!user) {
+    if (!userDoc) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json(user.expenses || [])
+    return NextResponse.json(userDoc.expenses || [])
   } catch (err) {
     console.error('❌ Error fetching expenses:', err)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
