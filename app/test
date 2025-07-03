@@ -11,11 +11,6 @@ useEffect(() => {
 
   // ✅ Listen for profile update
 
-    : ''
-
-  useEffect(() => {
-    const updateSize = () => setIsMobile(window.innerWidth < 768)
-  const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/'
     localStorage.removeItem('token')
     window.location.href = '/sign-up'
