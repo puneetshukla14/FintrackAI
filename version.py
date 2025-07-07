@@ -1,1 +1,4 @@
-APP_VERSION = "1.0.0"
+{
+  "version": "1.1.0",
+  "download_url": "https://yourdomain.com/installer/SSISutraInstaller_v1.1.exe"
+}
