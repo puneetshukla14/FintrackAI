@@ -23,19 +23,17 @@ body {
 body::-webkit-scrollbar {
   width: 8px;
 }
-
 body::-webkit-scrollbar-thumb {
-  background: #52525b; /* Tailwind zinc-600 */
+  background: #52525b; /* zinc-600 */
   border-radius: 10px;
 }
-
 body::-webkit-scrollbar-track {
   background: transparent;
 }
 
 /* ===== Selection Highlight ===== */
 ::selection {
-  background: #22c55e; /* Tailwind emerald-500 */
+  background: #22c55e; /* emerald-500 */
   color: #000;
 }
 
@@ -44,9 +42,8 @@ body::-webkit-scrollbar-track {
   transition: all 0.2s ease-in-out;
 }
 
-/* ===== Utility Layer for Animations ===== */
+/* ===== Utility Layer for Custom Animations ===== */
 @layer utilities {
-  /* Typewriter animation with blinking cursor */
   .animate-typewriter {
     animation: typing 3s steps(60, end), blink 1s step-end infinite;
     white-space: nowrap;
@@ -56,16 +53,15 @@ body::-webkit-scrollbar-track {
   }
 
   @keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
+    from { width: 0 }
+    to { width: 100% }
   }
 
   @keyframes blink {
-    0%, 100% { border-color: transparent; }
-    50% { border-color: #22c55e; }
+    0%, 100% { border-color: transparent }
+    50% { border-color: #22c55e }
   }
 
-  /* Optional pulse background (for AI-like cards) */
   .bg-animated-ai {
     background: linear-gradient(270deg, #0f172a, #1e293b, #0f172a);
     background-size: 600% 600%;
