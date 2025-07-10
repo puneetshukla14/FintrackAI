@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import {
   LayoutDashboard, CreditCard, Wallet, Calendar, Bot,
   BarChart, Settings, Lock, X, Menu, LogOut, User, FileText, PlusCircle
@@ -29,59 +28,44 @@ const links = [
   { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
 ]
 
-
 export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname()
-
   const [userName, setUserName] = useState('')
   const [gender, setGender] = useState('')
   const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-  async function fetchUserProfile() {
-    try {
-      const res = await fetch('/api/user/profile')
-      const data = await res.json()
-      if (res.status === 404 || data.error === 'User not found') {
-        window.location.href = '/sign-up'
-        return
+  useEffect(() => {
+    async function fetchUserProfile() {
+      try {
+        const res = await fetch('/api/user/profile')
+        const data = await res.json()
+        if (res.status === 404 || data.error === 'User not found') {
+          window.location.href = '/sign-up'
+          return
+        }
+        if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
+        setUserName(data?.profile?.fullName || 'Guest')
+        setGender(data?.profile?.gender || '')
+      } catch (err) {
+        console.error('Sidebar: Error fetching profile', err)
+      } finally {
+        setLoading(false)
       }
-      if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
-      setUserName(data?.profile?.fullName || 'Guest')
-      setGender(data?.profile?.gender || '')
-    } catch (err) {
-      console.error('Sidebar: Error fetching profile', err)
-    } finally {
-      setLoading(false)
     }
-  }
 
-  fetchUserProfile()
-
-  // ✅ Listen for profile update
-  const handleProfileUpdated = () => {
     fetchUserProfile()
-  }
+    const handleProfileUpdated = () => fetchUserProfile()
+    window.addEventListener('profileUpdated', handleProfileUpdated)
+    return () => window.removeEventListener('profileUpdated', handleProfileUpdated)
+  }, [])
 
-  window.addEventListener('profileUpdated', handleProfileUpdated)
+  const getAvatarSrc = () =>
+    gender === 'Male' ? '/avatars/male.png' :
+    gender === 'Female' ? '/avatars/female.png' : ''
 
-  return () => {
-    window.removeEventListener('profileUpdated', handleProfileUpdated)
-  }
-}, [])
-
-
-  const getAvatarSrc = () => gender === 'Male'
-    ? '/avatars/male.png'
-    : gender === 'Female'
-    ? '/avatars/female.png'
-    : ''
-
-
-useEffect(() => {
-  document.body.style.overflow = isMobile && sidebarOpen ? 'hidden' : 'auto'
-}, [isMobile, sidebarOpen])
-
+  useEffect(() => {
+    document.body.style.overflow = isMobile && sidebarOpen ? 'hidden' : 'auto'
+  }, [isMobile, sidebarOpen])
 
   const handleLogout = () => {
     document.cookie = 'token=; Max-Age=0; path=/'
@@ -107,16 +91,16 @@ useEffect(() => {
         />
       )}
 
-      <motion.aside
-        initial={{ x: -300 }}
-        animate={{ x: sidebarOpen || !isMobile ? 0 : -300 }}
-        transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-        className={clsx(
-          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
-          'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
-          'md:block'
-        )}
-      >
+<aside
+  className={clsx(
+    'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
+    'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
+    'transition-transform duration-300 ease-in-out',
+    sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full',
+    'md:translate-x-0 md:block'
+  )}
+>
+
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
 
         {/* Header */}
@@ -131,13 +115,8 @@ useEffect(() => {
 
         {/* Links */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
-          {links.map(({ href, label, icon: Icon, isAction }, i) => (
-            <motion.div
-              key={href}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: isMobile ? i * 0.05 : 0 }}
-            >
+          {links.map(({ href, label, icon: Icon, isAction }) => (
+            <div key={href}>
               {isAction ? (
                 <button
                   onClick={() => {
@@ -164,24 +143,19 @@ useEffect(() => {
                   <span className="text-sm font-medium tracking-wide">{label}</span>
                 </Link>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
+
         {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
-
-          {/* Profile Link */}
           <Link
             href="/userprofile"
             className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
           >
             <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
               {getAvatarSrc() ? (
-                <img
-                  src={getAvatarSrc()}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
               ) : (
                 <User className="text-white w-5 h-5" />
               )}
@@ -196,7 +170,6 @@ useEffect(() => {
             </div>
           </Link>
 
-          {/* Logout */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
@@ -205,13 +178,12 @@ useEffect(() => {
             <span className="text-sm tracking-wide">Logout</span>
           </button>
 
-          {/* Footer Note */}
           <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
-            <span>v1.0 • ExpenseX Pro</span>
-            <span className="text-[10px] text-blue-400">Puneet Shukla Tech</span>
+            <span>v1.0 • Fintrack AI Powered</span>
+            <span className="text-[10px] text-blue-400">Puneet Shukla</span>
           </div>
         </div>
-      </motion.aside>
+      </aside>
     </>
   )
 }
