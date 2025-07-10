@@ -95,12 +95,13 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
   className={clsx(
     'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
     'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
-    'transition-transform duration-300 ease-in-out',
-    sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full',
-    'md:translate-x-0 md:block'
+    'transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
+    sidebarOpen || !isMobile
+      ? 'translate-x-0 opacity-100 scale-100'
+      : '-translate-x-full opacity-0 scale-90',
+    'md:translate-x-0 md:opacity-100 md:scale-100 md:block'
   )}
 >
-
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
 
         {/* Header */}
