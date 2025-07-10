@@ -8,6 +8,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
+import { motion } from 'framer-motion'
 
 type SidebarProps = {
   isMobile: boolean
@@ -17,7 +18,7 @@ type SidebarProps = {
 
 const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/expenses', label: ' Add Expenses', icon: CreditCard },
+  { href: '/expenses', label: 'Add Expenses', icon: CreditCard },
   { href: '/myexpenses', label: 'My Expenses', icon: Wallet },
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
@@ -27,6 +28,42 @@ const links = [
   { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
   { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
 ]
+
+// Sidebar container animation
+const containerVariants = {
+  open: {
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.1,
+    },
+  },
+  closed: {
+    transition: {
+      staggerChildren: 0.03,
+      staggerDirection: -1,
+    },
+  },
+}
+
+// Each link animation
+const itemVariants = {
+  open: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 500,
+      damping: 30,
+    },
+  },
+  closed: {
+    opacity: 0,
+    x: -20,
+    scale: 0.95,
+    transition: { duration: 0.2 },
+  },
+}
 
 export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: SidebarProps) {
   const pathname = usePathname()
@@ -91,17 +128,17 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
         />
       )}
 
-<aside
-  className={clsx(
-    'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
-    'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
-    'transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
-    sidebarOpen || !isMobile
-      ? 'translate-x-0 opacity-100 scale-100'
-      : '-translate-x-full opacity-0 scale-90',
-    'md:translate-x-0 md:opacity-100 md:scale-100 md:block'
-  )}
->
+      <aside
+        className={clsx(
+          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
+          'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
+          'transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
+          sidebarOpen || !isMobile
+            ? 'translate-x-0 opacity-100 scale-100'
+            : '-translate-x-full opacity-0 scale-90',
+          'md:translate-x-0 md:opacity-100 md:scale-100 md:block'
+        )}
+      >
         <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
 
         {/* Header */}
@@ -115,9 +152,14 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
         </div>
 
         {/* Links */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+        <motion.div
+          className="flex-1 overflow-y-auto px-5 py-4 space-y-2"
+          variants={containerVariants}
+          initial="closed"
+          animate={sidebarOpen || !isMobile ? 'open' : 'closed'}
+        >
           {links.map(({ href, label, icon: Icon, isAction }) => (
-            <div key={href}>
+            <motion.div key={href} variants={itemVariants}>
               {isAction ? (
                 <button
                   onClick={() => {
@@ -144,9 +186,9 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
                   <span className="text-sm font-medium tracking-wide">{label}</span>
                 </Link>
               )}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
