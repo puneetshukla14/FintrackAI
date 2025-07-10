@@ -1,3 +1,4 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
   content: [
@@ -5,25 +6,36 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-extend: {
-  fontFamily: {
-    mono: ['Courier New', 'monospace'],
-  },
-  animation: {
-    typewriter: 'typing 3.5s steps(40, end) 1 normal both, blink 1s step-end infinite',
-  },
-  keyframes: {
-    typing: {
-      from: { width: '0%' },
-      to: { width: '100%' },
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        mono: ['Courier New', 'monospace'],
+      },
+      animation: {
+        typewriter: 'typing 3.5s steps(40, end) 1 normal both, blink 1s step-end infinite',
+        pulseBackground: 'pulseBackground 15s ease infinite',
+      },
+      keyframes: {
+        typing: {
+          from: { width: '0%' },
+          to: { width: '100%' },
+        },
+        blink: {
+          '0%, 100%': { borderColor: 'transparent' },
+          '50%': { borderColor: '#22c55e' },
+        },
+        pulseBackground: {
+          '0%, 100%': {
+            backgroundPosition: '0% 50%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+          },
+        },
+      },
     },
-    blink: {
-      '0%, 100%': { borderColor: 'transparent' },
-      '50%': { borderColor: '#22c55e' },
-    },
   },
-}
-
-  },
-  plugins: [require('tailwind-scrollbar')],
+  plugins: [
+    require('tailwind-scrollbar'),
+  ],
 }
