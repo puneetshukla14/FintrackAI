@@ -23,8 +23,6 @@ const links = [
   { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
   { href: '/reports', label: 'Reports', icon: BarChart },
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/admin', label: 'Admin', icon: Lock },
   { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
   { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
 ]
@@ -128,9 +126,10 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
         />
       )}
 
-      <aside
-        className={clsx(
-          'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col justify-between',
+<aside
+  className={clsx(
+    'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col',
+
           'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
           'transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
           sidebarOpen || !isMobile
@@ -150,8 +149,7 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
             </button>
           )}
         </div>
-
-        {/* Links */}
+{/* Links Section - Scrollable */}
 <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
   {links.map(({ href, label, icon: Icon, isAction }, index) => {
     const isVisible = sidebarOpen || !isMobile
@@ -203,45 +201,43 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
   })}
 </div>
 
+{/* Footer - Always at bottom */}
+<div className="px-5 pt-3 pb-6 border-t border-white/10 mt-auto">
+  <Link
+    href="/userprofile"
+    className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
+  >
+    <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
+      {getAvatarSrc() ? (
+        <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
+      ) : (
+        <User className="text-white w-5 h-5" />
+      )}
+    </div>
+    <div className="flex flex-col">
+      <span className="text-sm font-medium text-white group-hover:text-blue-300">
+        {loading ? 'Loading...' : userName || 'Guest'}
+      </span>
+      <span className="text-xs text-white/60 group-hover:text-blue-300 transition">
+        View Profile
+      </span>
+    </div>
+  </Link>
 
-     
+  <button
+    onClick={handleLogout}
+    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
+  >
+    <LogOut size={16} />
+    <span className="text-sm tracking-wide">Logout</span>
+  </button>
 
-        {/* Footer */}
-        <div className="px-5 pt-3 pb-6 border-t border-white/10">
-          <Link
-            href="/userprofile"
-            className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
-          >
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-              {getAvatarSrc() ? (
-                <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <User className="text-white w-5 h-5" />
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-white group-hover:text-blue-300">
-                {loading ? 'Loading...' : userName || 'Guest'}
-              </span>
-              <span className="text-xs text-white/60 group-hover:text-blue-300 transition">
-                View Profile
-              </span>
-            </div>
-          </Link>
+  <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
+    <span>v1.0 • Fintrack AI Powered</span>
+    <span className="text-[10px] text-blue-400">Puneet Shukla</span>
+  </div>
+</div>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
-          >
-            <LogOut size={16} />
-            <span className="text-sm tracking-wide">Logout</span>
-          </button>
-
-          <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
-            <span>v1.0 • Fintrack AI Powered</span>
-            <span className="text-[10px] text-blue-400">Puneet Shukla</span>
-          </div>
-        </div>
       </aside>
     </>
   )
