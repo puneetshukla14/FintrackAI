@@ -152,43 +152,59 @@ export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: Sideb
         </div>
 
         {/* Links */}
-        <motion.div
-          className="flex-1 overflow-y-auto px-5 py-4 space-y-2"
-          variants={containerVariants}
-          initial="closed"
-          animate={sidebarOpen || !isMobile ? 'open' : 'closed'}
-        >
-          {links.map(({ href, label, icon: Icon, isAction }) => (
-            <motion.div key={href} variants={itemVariants}>
-              {isAction ? (
-                <button
-                  onClick={() => {
-                    if (isMobile) setSidebarOpen(false)
-                    window.location.href = href
-                  }}
-                  className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
-                >
-                  <Icon size={20} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-medium tracking-wide">{label}</span>
-                </button>
-              ) : (
-                <Link
-                  href={href}
-                  onClick={() => isMobile && setSidebarOpen(false)}
-                  className={clsx(
-                    'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
-                    pathname === href
-                      ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  )}
-                >
-                  <Icon size={20} className="group-hover:scale-105 transition-transform" />
-                  <span className="text-sm font-medium tracking-wide">{label}</span>
-                </Link>
+<div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+  {links.map(({ href, label, icon: Icon, isAction }, index) => {
+    const isVisible = sidebarOpen || !isMobile
+    return (
+      <motion.div
+        key={href}
+        initial={{ opacity: 0, x: -40 }}
+        animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
+        transition={{
+          delay: isVisible ? 0.05 * index : 0,
+          duration: 0.4,
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+        }}
+      >
+        {isAction ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              if (isMobile) setSidebarOpen(false)
+              window.location.href = href
+            }}
+            className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
+          >
+            <Icon size={20} className="group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium tracking-wide">{label}</span>
+          </motion.button>
+        ) : (
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href={href}
+              onClick={() => isMobile && setSidebarOpen(false)}
+              className={clsx(
+                'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
+                pathname === href
+                  ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
               )}
-            </motion.div>
-          ))}
-        </motion.div>
+            >
+              <Icon size={20} className="group-hover:scale-105 transition-transform" />
+              <span className="text-sm font-medium tracking-wide">{label}</span>
+            </Link>
+          </motion.div>
+        )}
+      </motion.div>
+    )
+  })}
+</div>
+
+
+     
 
         {/* Footer */}
         <div className="px-5 pt-3 pb-6 border-t border-white/10">
