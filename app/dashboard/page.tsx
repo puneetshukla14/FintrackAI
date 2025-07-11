@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import SmartSuggestionsCard from '@/components/dashboard/SmartSuggestionsCard'
+import SmartSuggestionsCard from '@/components/dashboard/suggestioncard/SmartSuggestionsCard'
 import SalaryCard from '@/components/dashboard/SalaryCard'
 import CalendarCard from '@/components/dashboard/CalendarCard'
 import ExpenseCategoryCard from '@/components/dashboard/ExpenseCategoryCard'
@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async () => {  
       try {
         const profileRes = await fetch('/api/user/profile', {
           method: 'GET',
@@ -30,7 +30,7 @@ export default function DashboardPage() {
         const profileData = await profileRes.json()
         const salary = profileData?.profile?.monthlySalary || 0
         setUserSalary(salary)
-
+ 
         const expenseRes = await fetch('/api/expenses', {
           method: 'GET',
           credentials: 'include',
@@ -73,20 +73,24 @@ export default function DashboardPage() {
   const remaining = userSalary - totalExpenses
 
   return (
-    <main className="min-h-screen p-6 space-y-6 xl:pl-[5.5rem] bg-gradient-to-br from-zinc-950 to-zinc-900 text-white">
-      <motion.section
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
-      >
+    <main className="min-h-screen px-4 sm:px-6 space-y-6 xl:pl-[5.5rem] bg-gradient-to-br from-zinc-950 to-zinc-900 text-white">
+
+<motion.section
+  initial={{ opacity: 0, y: 15 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.4, ease: 'easeOut' }}
+  className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-y-6 gap-x-4"
+>
+
+
         {/* Salary Card */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg h-full">
+        <div className="w-full bg-zinc-900 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,255,0.03)] border border-zinc-800 backdrop-blur-md">
+
           <SalaryCard />
         </div>
 
         {/* AI Suggestions */}
-        <div className="w-full bg-zinc-900 rounded-2xl p-5 shadow-lg xl:col-span-2">
+        <div className="w-full bg-zinc-900 rounded-3xl p-6 shadow-[0_0_30px_rgba(0,255,255,0.03)] border border-zinc-800 backdrop-blur-md">
           <SmartSuggestionsCard remaining={remaining} />
         </div>
 
