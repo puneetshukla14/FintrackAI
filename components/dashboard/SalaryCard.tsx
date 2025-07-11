@@ -119,9 +119,10 @@ const fetchData = async () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h3 className="text-xl font-bold text-cyan-400 tracking-wide">
-            Savings Overview
-          </h3>
+<h3 className="text-xl font-bold text-cyan-400 tracking-wide font-sans">
+  Savings Overview
+</h3>
+
           <p className="text-sm text-zinc-400">
             Your current financial snapshot
           </p>
@@ -172,22 +173,33 @@ const fetchData = async () => {
           </svg>
           <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
             <div className="flex flex-col items-center">
-              <span className="text-white text-[2.4rem] font-mono font-extrabold tracking-tight leading-tight">
-                {displayProgress}%
-              </span>
+<motion.span
+  className="text-[2rem] font-sans font-medium tracking-normal leading-snug text-white"
+  animate={{ scale: [1, 1.04, 1] }}
+  transition={{ repeat: Infinity, duration: 2 }}
+>
+  {displayProgress}%
+</motion.span>
+
+
+
               <span className="text-sm text-cyan-400 font-medium">Saved</span>
             </div>
           </div>
         </div>
       </div>
 {/* Stats */}
-<div className="mt-10 space-y-4 text-sm text-slate-300 px-2">
+<div className="mt-10 space-y-5 text-sm text-slate-300 px-2 sm:px-6">
+
   <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
     <div className="flex items-center gap-2">
       <Wallet size={16} className="text-zinc-400" />
       <span>Bank Balance</span>
     </div>
-    <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
+<span className="text-white font-sans font-medium text-sm sm:text-base">
+  ₹{baseSalary.toLocaleString()}
+</span>
+
   </div>
   <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
     <div className="flex items-center gap-2">
@@ -220,11 +232,25 @@ const fetchData = async () => {
 </div>
 
 
-      {progress < 30 && (
-        <p className="mt-6 text-xs text-amber-400 text-center italic">
-          Tip: Try to save at least 50% of your income this month.
-        </p>
-      )}
+{/* Goal Progress */}
+<div className="mt-6 px-2">
+  <p className="text-xs text-zinc-400 mb-1">
+    Monthly Goal: <span className="text-white font-medium">₹20,000</span>
+  </p>
+  <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+    <motion.div
+      className="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-pink-500"
+      initial={{ width: 0 }}
+      animate={{ width: `${Math.min((remaining / 20000) * 100, 100)}%` }}
+      transition={{ duration: 1 }}
+    />
+  </div>
+  <p className="text-[11px] text-cyan-300 mt-1">
+    {Math.round((remaining / 20000) * 100)}% of goal achieved
+  </p>
+</div>
+
+
     </motion.div>
   )
 }
