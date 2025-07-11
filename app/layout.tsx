@@ -13,9 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="text-white">
         <UserProvider>
           <SidebarWrapper>
-            <div className="flex flex-col min-h-screen">
-              {/* ✅ Main Content */}
-              <main className="px-4 sm:px-6 md:px-8 flex-1 overflow-auto">
+<div className="min-h-screen flex flex-col">
+  <main className="flex-1 flex flex-col">
+
+
                 {children}
               </main>
             </div>
