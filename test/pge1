@@ -10,12 +10,7 @@ import {
   getYear,
   parseISO,X
 import clsx from 'clsx'C
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'CCC4">Chadow-2xl relative text-white">X balance!`
-}
-
-interface Expense {
-  date: string
+import jsPDF from 'jspdf'X
   amount: number
   category?: string
   paymentMethod?: string
