@@ -1,244 +1,238 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { motion, useAnimation } from 'framer-motion'
 import {
-  LayoutDashboard, CreditCard, Wallet, Calendar, Bot,
-  BarChart, Settings, Lock, X, Menu, LogOut, User, FileText, PlusCircle
+  RotateCcw,
+  Briefcase,
+  Wallet,
+  Banknote,
+  CreditCard,
+  PiggyBank,
 } from 'lucide-react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import clsx from 'clsx'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
-type SidebarProps = {
-  isMobile: boolean
-  sidebarOpen: boolean
-  setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>
+export default function SavingsProgressChart() {
+  const [baseSalary, setBaseSalary] = useState(0)
+  const [credits, setCredits] = useState(0)
+  const [expenses, setExpenses] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [displayProgress, setDisplayProgress] = useState(0)
+
+  const iconControls = useAnimation()
+  const strokeControls = useAnimation()
+
+const fetchData = async () => {
+  const token = localStorage.getItem('token') || ''
+  try {
+    const [profileRes, expenseRes, creditRes] = await Promise.all([
+      fetch('/api/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch('/api/expenses', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch('/api/credits', {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ])
+
+    const profileData = await profileRes.json()
+    const expensesData = await expenseRes.json()
+    const creditsData = await creditRes.json()
+
+    const expenseList = Array.isArray(expensesData)
+      ? expensesData
+      : expensesData?.data || []
+
+    const creditList = Array.isArray(creditsData)
+      ? creditsData
+      : creditsData?.data || []
+
+    const totalExpense = expenseList.reduce(
+      (sum: number, item: any) => sum + (item.amount || 0),
+      0
+    )
+    const totalCredit = creditList.reduce(
+      (sum: number, item: any) => sum + (item.amount || 0),
+      0
+    )
+
+    const base = profileData?.profile?.bankBalance || 0
+    const totalFunds = base + totalCredit
+    const remaining = Math.max(totalFunds - totalExpense, 0)
+    const percentage = totalFunds > 0 ? (remaining / totalFunds) * 100 : 0
+
+    setBaseSalary(base)
+    setCredits(totalCredit)
+    setExpenses(totalExpense)
+    setProgress(Math.round(percentage))
+  } catch (err) {
+    console.error('Failed to fetch data:', err)
+  }
 }
 
-const links = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/expenses', label: 'Add Expenses', icon: CreditCard },
-  { href: '/myexpenses', label: 'My Expenses', icon: Wallet },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
-  { href: '/ai-assistant', label: 'AI Assistant', icon: Bot },
-  { href: '/reports', label: 'Reports', icon: BarChart },
-  { href: '/import-bank-statement', label: 'Import Bank Statement', icon: FileText },
-  { href: '/add-money', label: 'Add Money', icon: PlusCircle, isAction: true }
-]
-
-// Sidebar container animation
-const containerVariants = {
-  open: {
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.1,
-    },
-  },
-  closed: {
-    transition: {
-      staggerChildren: 0.03,
-      staggerDirection: -1,
-    },
-  },
-}
-
-// Each link animation
-const itemVariants = {
-  open: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 500,
-      damping: 30,
-    },
-  },
-  closed: {
-    opacity: 0,
-    x: -20,
-    scale: 0.95,
-    transition: { duration: 0.2 },
-  },
-}
-
-export default function Sidebar({ isMobile, sidebarOpen, setSidebarOpen }: SidebarProps) {
-  const pathname = usePathname()
-  const [userName, setUserName] = useState('')
-  const [gender, setGender] = useState('')
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchUserProfile() {
-      try {
-        const res = await fetch('/api/user/profile')
-        const data = await res.json()
-        if (res.status === 404 || data.error === 'User not found') {
-          window.location.href = '/sign-up'
-          return
-        }
-        if (!res.ok) throw new Error(data?.error || 'Failed to fetch profile')
-        setUserName(data?.profile?.fullName || 'Guest')
-        setGender(data?.profile?.gender || '')
-      } catch (err) {
-        console.error('Sidebar: Error fetching profile', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchUserProfile()
-    const handleProfileUpdated = () => fetchUserProfile()
-    window.addEventListener('profileUpdated', handleProfileUpdated)
-    return () => window.removeEventListener('profileUpdated', handleProfileUpdated)
+    fetchData()
   }, [])
 
-  const getAvatarSrc = () =>
-    gender === 'Male' ? '/avatars/male.png' :
-    gender === 'Female' ? '/avatars/female.png' : ''
-
   useEffect(() => {
-    document.body.style.overflow = isMobile && sidebarOpen ? 'hidden' : 'auto'
-  }, [isMobile, sidebarOpen])
+    let start = 0
+    const duration = 1000
+    const increment = progress / (duration / 20)
+    const counter = setInterval(() => {
+      start += increment
+      if (start >= progress) {
+        start = progress
+        clearInterval(counter)
+      }
+      setDisplayProgress(Math.round(start))
+    }, 20)
 
-  const handleLogout = () => {
-    document.cookie = 'token=; Max-Age=0; path=/'
-    localStorage.removeItem('token')
-    window.location.href = '/sign-up'
+    const offset = 377 - (377 * progress) / 100
+    strokeControls.start({
+      strokeDashoffset: offset,
+      transition: { duration: 1, ease: 'easeInOut' },
+    })
+
+    return () => clearInterval(counter)
+  }, [progress])
+
+  const handleRefresh = async () => {
+    iconControls.start({
+      rotate: 360,
+      transition: { duration: 0.6, ease: 'easeInOut' },
+    })
+    await fetchData()
+    iconControls.set({ rotate: 0 })
   }
 
+  const totalFunds = baseSalary + credits
+  const remaining = totalFunds - expenses
+
   return (
-    <>
-      {isMobile && !sidebarOpen && (
-        <button
-          className="fixed top-4 left-4 z-50 backdrop-blur-md p-3 rounded-lg border border-white/10 bg-white/10 text-white shadow-md"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu size={20} />
-        </button>
-      )}
+    <motion.div
+      className="w-full min-h-[600px] bg-gradient-to-br from-[#0e0e0f] to-[#1a1a1d] rounded-3xl p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)] text-white backdrop-blur-xl border border-zinc-800"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+<h3 className="text-xl font-bold text-cyan-400 tracking-wide font-sans">
+  Savings Overview
+</h3>
 
-      {isMobile && sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-<aside
-  className={clsx(
-    'fixed top-0 left-0 z-50 h-screen w-72 flex flex-col',
-
-          'bg-white/10 backdrop-blur-xl shadow-[inset_0_0_0.5px_rgba(255,255,255,0.1)] border-r border-white/10',
-          'transform transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
-          sidebarOpen || !isMobile
-            ? 'translate-x-0 opacity-100 scale-100'
-            : '-translate-x-full opacity-0 scale-90',
-          'md:translate-x-0 md:opacity-100 md:scale-100 md:block'
-        )}
-      >
-        <div className="absolute right-0 top-0 h-full w-[2px] bg-gradient-to-b from-blue-400 to-cyan-400 opacity-60" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-          <h1 className="text-xl font-bold tracking-wide text-white/90">ExpenseX Pro</h1>
-          {isMobile && (
-            <button className="text-white/60 hover:text-white" onClick={() => setSidebarOpen(false)}>
-              <X size={20} />
-            </button>
-          )}
+          <p className="text-sm text-zinc-400">
+            Your current financial snapshot
+          </p>
         </div>
-{/* Links Section - Scrollable */}
-<div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
-  {links.map(({ href, label, icon: Icon, isAction }, index) => {
-    const isVisible = sidebarOpen || !isMobile
-    return (
-      <motion.div
-        key={href}
-        initial={{ opacity: 0, x: -40 }}
-        animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
-        transition={{
-          delay: isVisible ? 0.05 * index : 0,
-          duration: 0.4,
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-        }}
-      >
-        {isAction ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              if (isMobile) setSidebarOpen(false)
-              window.location.href = href
-            }}
-            className="w-full group flex items-center gap-3 px-4 py-2.5 rounded-lg text-green-400 hover:text-white hover:bg-green-600/10 transition-all duration-200 shadow-sm"
-          >
-            <Icon size={20} className="group-hover:scale-110 transition-transform" />
-            <span className="text-sm font-medium tracking-wide">{label}</span>
-          </motion.button>
-        ) : (
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href={href}
-              onClick={() => isMobile && setSidebarOpen(false)}
-              className={clsx(
-                'group flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 shadow-sm',
-                pathname === href
-                  ? 'bg-white/10 text-white font-semibold backdrop-blur-sm'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              )}
-            >
-              <Icon size={20} className="group-hover:scale-105 transition-transform" />
-              <span className="text-sm font-medium tracking-wide">{label}</span>
-            </Link>
-          </motion.div>
-        )}
-      </motion.div>
-    )
-  })}
-</div>
+        <motion.button
+          onClick={handleRefresh}
+          animate={iconControls}
+          whileHover={{ scale: 1.1 }}
+          className="text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          <RotateCcw size={22} />
+        </motion.button>
+      </div>
 
-{/* Footer - Always at bottom */}
-<div className="px-5 pt-3 pb-6 border-t border-white/10 mt-auto">
-  <Link
-    href="/userprofile"
-    className="flex items-center gap-3 px-3 py-3 mb-2 rounded-lg hover:bg-white/10 transition-all duration-200 group"
-  >
-    <div className="w-10 h-10 rounded-full overflow-hidden bg-white/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-      {getAvatarSrc() ? (
-        <img src={getAvatarSrc()} alt="User Avatar" className="w-full h-full object-cover" />
-      ) : (
-        <User className="text-white w-5 h-5" />
-      )}
+      {/* Progress Circle */}
+      <div className="flex justify-center items-center mt-6">
+        <div className="relative w-44 h-44">
+          <div className="absolute inset-0 rounded-full bg-cyan-900/10 blur-2xl z-0 shadow-[0_0_30px_#06b6d4aa]" />
+          <svg className="w-full h-full rotate-[-90deg] relative z-10" viewBox="0 0 144 144">
+            <circle
+              cx="72"
+              cy="72"
+              r="60"
+              className="stroke-zinc-800"
+              strokeWidth="10"
+              fill="none"
+            />
+            <motion.circle
+              cx="72"
+              cy="72"
+              r="60"
+              stroke="url(#gradient)"
+              strokeWidth="10"
+              fill="none"
+              strokeDasharray="377"
+              strokeDashoffset="377"
+              strokeLinecap="round"
+              animate={strokeControls}
+              style={{ filter: 'drop-shadow(0 0 6px #0ea5e9)' }}
+            />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="50%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#8b5cf6" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center z-20 text-center">
+            <div className="flex flex-col items-center">
+<motion.span
+  className="text-[2rem] font-sans font-medium tracking-normal leading-snug text-white"
+  animate={{ scale: [1, 1.04, 1] }}
+  transition={{ repeat: Infinity, duration: 2 }}
+>
+  {displayProgress}%
+</motion.span>
+
+
+
+              <span className="text-sm text-cyan-400 font-medium">Saved</span>
+            </div>
+          </div>
+        </div>
+      </div>
+{/* Stats */}
+<div className="mt-10 space-y-4 text-sm text-slate-300 px-2">
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <Wallet size={16} className="text-zinc-400" />
+      <span>Bank Balance</span>
     </div>
-    <div className="flex flex-col">
-      <span className="text-sm font-medium text-white group-hover:text-blue-300">
-        {loading ? 'Loading...' : userName || 'Guest'}
-      </span>
-      <span className="text-xs text-white/60 group-hover:text-blue-300 transition">
-        View Profile
-      </span>
+    <span className="font-medium text-sky-400">₹{baseSalary.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <PiggyBank size={16} className="text-zinc-400" />
+      <span>Added Money</span>
     </div>
-  </Link>
-
-  <button
-    onClick={handleLogout}
-    className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 transition-all duration-200"
-  >
-    <LogOut size={16} />
-    <span className="text-sm tracking-wide">Logout</span>
-  </button>
-
-  <div className="mt-4 text-xs text-white/40 flex justify-between px-2">
-    <span>v1.0 • Fintrack AI Powered</span>
-    <span className="text-[10px] text-blue-400">Puneet Shukla</span>
+    <span className="font-medium text-green-400">+ ₹{credits.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <Banknote size={16} className="text-zinc-400" />
+      <span>Total Funds</span>
+    </div>
+    <span className="font-medium text-white">₹{totalFunds.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center border-b border-zinc-700 pb-1">
+    <div className="flex items-center gap-2">
+      <CreditCard size={16} className="text-zinc-400" />
+      <span>Total Spent</span>
+    </div>
+    <span className="font-medium text-rose-400">₹{expenses.toLocaleString()}</span>
+  </div>
+  <div className="flex justify-between items-center">
+    <div className="flex items-center gap-2">
+      <Briefcase size={16} className="text-zinc-400" />
+      <span>Remaining</span>
+    </div>
+    <span className="font-medium text-emerald-400">₹{remaining.toLocaleString()}</span>
   </div>
 </div>
 
-      </aside>
-    </>
+
+      {progress < 30 && (
+        <p className="mt-6 text-xs text-amber-400 text-center italic">
+          Tip: Try to save at least 50% of your income this month.
+        </p>
+      )}
+    </motion.div>
   )
 }
