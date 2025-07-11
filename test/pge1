@@ -10,9 +10,7 @@ import {
 import jsPDF from 'jspdf'X
   amount: number
   category?: stringX
-C
-        const allExpenses: Expense[] = await res.json()
-
+CC
         const filtered = allExpenses.filter(exp => {
           const date = parseISO(exp.date)
           return getYear(date) === year &&
