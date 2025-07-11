@@ -12,12 +12,7 @@ import jsPDF from 'jspdf'X
   category?: stringX
 
 interface ExpenseMap {X
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)X
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      const token = localStorage.getItem('token')
-      try {
-        const res = await fetch('/api/expenses', {
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)XC
           headers: { Authorization: `Bearer ${token}` },
         })
         const allExpenses: Expense[] = await res.json()
