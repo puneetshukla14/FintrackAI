@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Volume2, RefreshCw, Brain } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Brain, Volume2, RefreshCw } from 'lucide-react'
+import { motion } from 'framer-motion'
+import GradientLoader from './GradientLoader'
+import NeonAvatar from './ProfileGlowAvatar'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -12,41 +14,37 @@ const LANGUAGES = [
 ] as const
 
 export default function SmartSuggestionsCard({ remaining }: { remaining: number }) {
-  const [suggestion, setSuggestion] = useState('')
-  const [displayText, setDisplayText] = useState('')
-  const [index, setIndex] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [expanded, setExpanded] = useState(true)
   const [username, setUsername] = useState('User')
   const [gender, setGender] = useState('unspecified')
   const [language, setLanguage] = useState<'en' | 'hi' | 'es' | 'fr'>('en')
+  const [loading, setLoading] = useState(true)
+  const [typed, setTyped] = useState('')
+  const [fullText, setFullText] = useState('')
+  const [index, setIndex] = useState(0)
 
-  const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return language === 'hi' ? 'सुप्रभात' : 'Good Morning'
-    if (hour < 17) return language === 'hi' ? 'नमस्कार' : 'Good Afternoon'
-    return language === 'hi' ? 'शुभ संध्या' : 'Good Evening'
+  const speak = () => {
+    if (!fullText) return
+    const utter = new SpeechSynthesisUtterance(fullText)
+    utter.lang = language === 'hi' ? 'hi-IN' : language === 'es' ? 'es-ES' : language === 'fr' ? 'fr-FR' : 'en-IN'
+    speechSynthesis.speak(utter)
   }
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const res = await fetch('/api/user/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json()
-        setUsername(data?.profile?.name || 'User')
-        setGender(data?.profile?.gender || 'unspecified')
-      } catch {
-        setUsername('User')
-        setGender('unspecified')
-      }
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const data = await res.json()
+      setUsername(data?.profile?.name || 'User')
+      setGender(data?.profile?.gender || 'unspecified')
+    } catch {
+      setUsername('User')
+      setGender('unspecified')
     }
-    fetchUserData()
-  }, [])
+  }
 
-  const getSuggestions = async () => {
+  const fetchSuggestion = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/ai/suggestions', {
@@ -55,139 +53,84 @@ export default function SmartSuggestionsCard({ remaining }: { remaining: number 
         body: JSON.stringify({ balance: remaining, username, gender, language }),
       })
       const data = await res.json()
-      const fullText = data.answer || `${username}, FinBot couldn’t generate suggestions right now.`
-      setSuggestion(fullText)
-      setDisplayText('')
+      const suggestion = data?.answer || `${username}, FinBot is currently offline.`
+      setFullText(suggestion)
+      setTyped('')
       setIndex(0)
     } catch {
-      const fallback = `${username}, FinBot couldn’t generate suggestions right now.`
-      setSuggestion(fallback)
-      setDisplayText('')
+      setFullText(`${username}, FinBot is currently offline.`)
+      setTyped('')
       setIndex(0)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (username && gender) getSuggestions()
-  }, [remaining, username, gender, language])
-
-  useEffect(() => {
-    if (!suggestion || loading) return
-    if (index < suggestion.length) {
-      const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + suggestion.charAt(index))
-        setIndex(prev => prev + 1)
-      }, 15)
-      return () => clearTimeout(timeout)
+  const getGreeting = () => {
+    const h = new Date().getHours()
+    const map = {
+      en: ['Good morning', 'Good afternoon', 'Good evening'],
+      hi: ['सुप्रभात', 'शुभ अपराह्न', 'शुभ संध्या'],
+      es: ['Buenos días', 'Buenas tardes', 'Buenas noches'],
+      fr: ['Bonjour', 'Bon après-midi', 'Bonsoir'],
     }
-  }, [index, suggestion, loading])
-
-  const speak = () => {
-    if (!suggestion) return
-    const utterance = new SpeechSynthesisUtterance(suggestion)
-    utterance.lang =
-      language === 'hi'
-        ? 'hi-IN'
-        : language === 'es'
-        ? 'es-ES'
-        : language === 'fr'
-        ? 'fr-FR'
-        : 'en-IN'
-    utterance.rate = 1
-    utterance.pitch = 1
-    speechSynthesis.speak(utterance)
+    const t = h < 12 ? 0 : h < 17 ? 1 : 2
+    return map[language][t]
   }
+
+  useEffect(() => { fetchUser() }, [])
+  useEffect(() => { if (username) fetchSuggestion() }, [remaining, username, language])
+  useEffect(() => {
+    if (!loading && fullText && index < fullText.length) {
+      const timer = setTimeout(() => {
+        setTyped((prev) => prev + fullText.charAt(index))
+        setIndex((i) => i + 1)
+      }, 14)
+      return () => clearTimeout(timer)
+    }
+  }, [index, fullText, loading])
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 25 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full rounded-xl p-6 shadow-xl bg-zinc-950 border border-zinc-800 text-white flex flex-col space-y-4"
+      className="w-full max-w-3xl mx-auto rounded-2xl p-6 bg-[#0b0d10]/60 border border-white/10 backdrop-blur-lg shadow-[0_0_50px_#00FFF0]/10"
     >
       {/* Header */}
-      <div className="flex items-center gap-4">
-<div className="bg-emerald-600 text-white rounded-full w-9 h-9 flex items-center justify-center font-semibold text-sm uppercase">
-  {(() => {
-    const cleanName = (username || 'User').trim()
-    const firstLetter = cleanName.length > 0 ? cleanName.charAt(0).toUpperCase() : 'U'
-    return firstLetter
-  })()}
-</div>
-
-        <div className="flex-1">
-          <p className="text-sm font-medium text-emerald-300">
-            {getGreeting()}, {username}
-          </p>
+      <div className="flex justify-between items-center gap-4">
+        <div className="flex items-center gap-4">
+          <NeonAvatar initial={username[0] || 'U'} />
+          <div>
+            <p className="text-sm text-neutral-300">
+              {getGreeting()}, <span className="font-semibold text-white">{username}</span> 👋
+            </p>
+            <h2 className="text-sm font-medium text-cyan-300 flex items-center gap-2 mt-1">
+              <Brain size={16} /> AI Suggestion
+            </h2>
+          </div>
         </div>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value as 'en' | 'hi' | 'es' | 'fr')}
-          className="text-xs text-white bg-zinc-800 px-2 py-1 rounded border border-zinc-600"
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.code} value={lang.code} className="bg-zinc-800 text-white">
-              {lang.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Title */}
-      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Brain size={18} className="text-emerald-400" />
-          <h2 className="text-base font-semibold text-white">Fintech AI Insights</h2>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={speak} className="text-zinc-400 hover:text-emerald-300">
-            <Volume2 size={18} />
-          </button>
-          <button onClick={getSuggestions} className="text-zinc-400 hover:text-blue-400">
-            <RefreshCw size={18} />
-          </button>
+          <button onClick={speak} className="text-zinc-400 hover:text-cyan-400"><Volume2 size={18} /></button>
+          <button onClick={fetchSuggestion} className="text-zinc-400 hover:text-blue-400"><RefreshCw size={18} /></button>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as any)}
+            className="bg-zinc-800 border border-zinc-700 text-white text-xs px-2 py-1 rounded-md"
+          >
+            {LANGUAGES.map(lang => (
+              <option key={lang.code} value={lang.code}>{lang.label}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Toggle */}
-      <button
-        className="text-xs text-cyan-400 hover:underline self-end"
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded
-          ? language === 'hi'
-            ? 'विवरण छुपाएं'
-            : 'Hide'
-          : language === 'hi'
-            ? 'सुझाव दिखाएं'
-            : 'Show'}
-      </button>
-
-      {/* Output */}
-      <AnimatePresence mode="wait">
-        {expanded && (
-          <motion.div
-            key="content"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4 }}
-            className="overflow-hidden"
-          >
-            <div className="text-sm text-slate-300 leading-relaxed min-h-[180px] md:min-h-[220px] p-4 rounded-lg border border-emerald-500/20 bg-zinc-900 relative shadow-sm font-mono whitespace-pre-wrap">
-              {loading ? (
-                <p className="italic text-zinc-500">
-                  {language === 'hi' ? 'FinBot सोच रहा है...' : 'Generating insight...'}
-                </p>
-              ) : (
-                <p className="text-emerald-400">{displayText}</p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Body */}
+      <div className="mt-5">
+        <div className="rounded-lg p-4 bg-black/40 border border-white/10 shadow-inner shadow-cyan-400/10 min-h-[80px] text-[15px] text-neutral-200 leading-relaxed font-light">
+          {loading ? <GradientLoader /> : typed}
+        </div>
+      </div>
     </motion.div>
   )
 }
