@@ -10,8 +10,7 @@ import {
   getYear,
   parseISO,
 } from 'date-fns'
-import clsx from 'clsx'
-import { motion } from 'framer-motion'
+import clsx from 'clsx'C
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'CCC4">Chadow-2xl relative text-white">
       <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-red-500">
