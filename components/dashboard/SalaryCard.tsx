@@ -111,11 +111,12 @@ const fetchData = async () => {
   const remaining = totalFunds - expenses
 
   return (
-    <motion.div
-      className="w-full min-h-[600px] bg-gradient-to-br from-[#0e0e0f] to-[#1a1a1d] rounded-3xl p-8 shadow-[0_0_30px_rgba(0,255,255,0.05)] text-white backdrop-blur-xl border border-zinc-800"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+<motion.div
+  className="w-full min-h-screen sm:min-h-[600px] bg-gradient-to-br from-[#0e0e0f] to-[#1a1a1d] rounded-none sm:rounded-3xl px-4 py-6 sm:p-8 shadow-none sm:shadow-[0_0_30px_rgba(0,255,255,0.05)] text-white backdrop-blur-xl border-none sm:border sm:border-zinc-800"
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
