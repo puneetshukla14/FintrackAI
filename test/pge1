@@ -9,10 +9,7 @@ import {
   getMonth,X
 import jsPDF from 'jspdf'X
   amount: number
-  category?: string
-  paymentMethod?: string
-  description?: string
-}
+  category?: stringX
 
 interface ExpenseMap {
   [key: string]: Expense[]
