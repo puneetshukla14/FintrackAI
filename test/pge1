@@ -6,10 +6,7 @@ import {
   startOfYear,
   endOfYear,
   eachDayOfInterval,
-  getMonth,
-  getYear,
-  parseISO,X
-import clsx from 'clsx'C
+  getMonth,X
 import jsPDF from 'jspdf'X
   amount: number
   category?: string
