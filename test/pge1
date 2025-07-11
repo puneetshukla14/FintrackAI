@@ -15,12 +15,7 @@ import html2canvas from 'html2canvas'CCC4">Chadow-2xl relative text-white">
       <button onClick={onClose} className="absolute top-3 right-3 text-gray
     if (!isNaN(date.getTime())) {
       const month = getMonth(date)
-      totals[month] += exp.amount || 0
-    }
-  })
-  const maxMonth = totals.indexOf(Math.max(...totals))
-  const minMonth = totals.indexOf(Math.min(...totals))
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      totals[month] += exp.amount || 0XSep', 'Oct', 'Nov', 'Dec']
   return `Highest in ${months[maxMonth]}, Lowest in ${months[minMonth]}. Maintain balance!`
 }
 
