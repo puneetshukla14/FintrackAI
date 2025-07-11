@@ -13,14 +13,7 @@ import jsPDF from 'jspdf'X
 CC
         const filtered = allExpenses.filter(exp => {
           const date = parseISO(exp.date)
-          return getYear(date) === year &&
-            (!categoryFilter || exp.category === categoryFilter) &&
-            (!paymentFilter || exp.paymentMethod === paymentFilter)
-        })
-
-        const map: ExpenseMap = {}
-        filtered.forEach(exp => {
-          const key = format(new Date(exp.date), 'yyyy-MM-dd')
+          return getYear(date) === year &&V
           if (!map[key]) map[key] = []
           map[key].push(exp)
         })
