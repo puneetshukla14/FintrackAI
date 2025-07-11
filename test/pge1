@@ -8,8 +8,7 @@ import {
   eachDayOfInterval,
   getMonth,
   getYear,
-  parseISO,
-} from 'date-fns'
+  parseISO,X
 import clsx from 'clsx'C
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'CCC4">Chadow-2xl relative text-white">
