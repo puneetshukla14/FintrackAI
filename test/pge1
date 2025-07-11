@@ -12,11 +12,7 @@ import jsPDF from 'jspdf'X
   category?: stringX
 
 interface ExpenseMap {X
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
-  const [aiSuggestions, setAiSuggestions] = useState<string>('')
-  const [categoryFilter, setCategoryFilter] = useState('')
-  const [paymentFilter, setPaymentFilter] = useState('')
-
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)X
   useEffect(() => {
     const fetchExpenses = async () => {
       const token = localStorage.getItem('token')
