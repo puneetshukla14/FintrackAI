@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { triggerHeaderUpdate } from '@/lib/events' //
+import { motion } from 'framer-motion'
+import toast, { Toaster } from 'react-hot-toast'
+import { triggerHeaderUpdate } from '@/lib/events'
 import {
   FiRefreshCw, FiCalendar, FiClock, FiTag, FiMapPin,
   FiFileText, FiCreditCard, FiDollarSign, FiSave
@@ -42,6 +44,35 @@ export default function ExpensesPage() {
   const [recurring, setRecurring] = useState(false)
   const [multiEntry, setMultiEntry] = useState(false)
   const [locationSuggestions, setLocationSuggestions] = useState<string[]>([])
+
+  // Load saved draft
+  useEffect(() => {
+    const draft = localStorage.getItem('expenseDraft')
+    if (draft) {
+      const d = JSON.parse(draft)
+      setAmount(d.amount || '')
+      setDate(d.date || '')
+      setTime(d.time || '')
+      setIncludeTime(d.includeTime || false)
+      setMainCategory(d.mainCategory || 'Groceries')
+      setSubCategory(d.subCategory || '')
+      setPaymentMethod(d.paymentMethod || 'Cash')
+      setTags(d.tags || '')
+      setNotes(d.notes || '')
+      setLocation(d.location || '')
+      setRecurring(d.recurring || false)
+      setMultiEntry(d.multiEntry || false)
+    }
+  }, [])
+
+  // Auto save form to localStorage
+  useEffect(() => {
+    localStorage.setItem('expenseDraft', JSON.stringify({
+      amount, date, time, includeTime,
+      mainCategory, subCategory, paymentMethod,
+      tags, notes, location, recurring, multiEntry
+    }))
+  }, [amount, date, time, includeTime, mainCategory, subCategory, paymentMethod, tags, notes, location, recurring, multiEntry])
 
   useEffect(() => {
     fetchDeviceLocation()
@@ -95,61 +126,75 @@ export default function ExpensesPage() {
     }
   }
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-  const data = {
-    amount: Number(amount),
-    date,
-    time: includeTime ? time : '',
-    includeTime,
-    category: `${mainCategory} - ${subCategory}`,
-    paymentMethod,
-    tags,
-    notes,
-    location,
-    recurring,
-    multiEntry,
-  }
-
-  try {
-    const token = localStorage.getItem('token') || ''
-
-    const res = await fetch('/api/expenses', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    })
-
-    const result = await res.json()
-
-    if (res.ok) {
-      alert('Expense saved successfully!')
-
-      // ✅ 🔥 Call this to update Header in real-time
-      triggerHeaderUpdate()
-
-      // Reset form
-      setAmount('')
-      setNotes('')
-      setTags('')
-      setSubCategory('')
-    } else {
-      alert(`Error: ${result.error || 'Unknown error occurred'}`)
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      toast.error('Please enter a valid amount')
+      return
     }
-  } catch (err) {
-    alert('Network error. Please try again.')
-    console.error(err)
+    if (!subCategory) {
+      toast.error('Please select a subcategory')
+      return
+    }
+
+    const data = {
+      amount: Number(amount),
+      date,
+      time: includeTime ? time : '',
+      includeTime,
+      category: `${mainCategory} - ${subCategory}`,
+      paymentMethod,
+      tags,
+      notes,
+      location,
+      recurring,
+      multiEntry,
+    }
+
+    try {
+      const token = localStorage.getItem('token') || ''
+      const res = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await res.json()
+
+      if (res.ok) {
+        toast.success('Expense saved successfully!')
+        triggerHeaderUpdate()
+        localStorage.removeItem('expenseDraft')
+        setAmount('')
+        setNotes('')
+        setTags('')
+        setSubCategory('')
+      } else {
+        toast.error(result.error || 'Unknown error occurred')
+      }
+    } catch (err) {
+      toast.error('Network error. Please try again.')
+      console.error(err)
+    }
   }
-}
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white px-4 py-6 sm:px-6 lg:px-8 overflow-auto">
-      {/* --- Expense Form --- */}
-      <div className="w-full max-w-2xl mx-auto bg-neutral-900 border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-lg mb-12">
+    <div className="min-h-screen bg-neutral-950 text-white px-4 py-6 sm:px-6 lg:px-8 overflow-y-auto overscroll-contain touch-manipulation relative z-20">
+
+
+
+      <Toaster position="top-right" />
+<motion.div
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6 }}
+  className="w-full max-w-2xl mx-auto bg-neutral-900/70 backdrop-blur-md border border-neutral-800 rounded-3xl p-6 sm:p-8 shadow-xl mb-12 pb-28 sm:pb-8" // 👈 ADD `pb-28`
+>
+
         <h1 className="text-3xl font-bold text-center mb-6">Add New Expense</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <InputField label="Amount" icon={<FiDollarSign />} value={amount} onChange={setAmount} placeholder="Enter amount" type="number" required />
@@ -191,7 +236,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               {locationSuggestions.length > 0 && (
                 <ul className="absolute z-50 mt-1 bg-neutral-800 border border-neutral-700 w-full rounded-md max-h-40 overflow-auto text-sm">
                   {locationSuggestions.map((loc, index) => (
-                    <li key={`${loc}-${index}`} onClick={() => { setLocation(loc); setLocationSuggestions([]); }} className="p-2 hover:bg-neutral-700 cursor-pointer">
+                    <li key={`${loc}-${index}`} onClick={() => { setLocation(loc); setLocationSuggestions([]); }} className="p-2 hover:bg-blue-700 hover:text-white cursor-pointer">
                       {loc}
                     </li>
                   ))}
@@ -216,15 +261,12 @@ const handleSubmit = async (e: React.FormEvent) => {
             Save Expense
           </button>
         </form>
-      </div>
+      </motion.div>
     </div>
   )
 }
 
-// ---------------------
-// Helper Components
-// ---------------------
-
+// Reusable Input Field
 function InputField({ label, icon, value, onChange, ...rest }: any) {
   return (
     <div>
