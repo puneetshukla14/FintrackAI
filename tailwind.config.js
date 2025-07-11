@@ -5,12 +5,14 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
   ],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        mono: ['Courier New', 'monospace'],
-      },
+// tailwind.config.js
+theme: {
+  extend: {
+    fontFamily: {
+      sans: ['Satoshi', 'sans-serif'], // or 'Inter', 'Space Grotesk'
+      mono: ['JetBrains Mono', 'monospace'],
+    },
+
       animation: {
         typewriter: 'typing 3.5s steps(40, end) 1 normal both, blink 1s step-end infinite',
         pulseBackground: 'pulseBackground 15s ease infinite',
